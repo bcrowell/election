@@ -1,9 +1,11 @@
-import math,random,statistics
+import math,random,statistics,sys
 
 def main():
   electoral_votes = {'az':11,'fl':29,'nc':15,'wi':10,'mi':16,
       'pa':20,'mn':10,'nh':4,'nv':6,
-      'ga':16,'ia':6,'oh':18,'tx':38}
+      'ga':16,'ia':6,'oh':18,'tx':38,
+      'mt':3,'in':11
+    }
 
   # 2020 jul 15, http://insideelections.com/ratings/president
   lean_raw = {
@@ -11,7 +13,9 @@ def main():
       'mi':1,'pa':1,
       'mn':2,'nh':2,
       'nv':3,
-      'ga':-1,'ia':-1,'oh':-2,'tx':-2
+      'ga':-1,'ia':-1,'oh':-2,'tx':-2,
+       # my own additions:
+      'mt':-7,'in':-9
       }
   # tweaks in cases where these expert opinions don't seem consistent with polls and predictit:
   lean_tweaks = {
@@ -29,7 +33,7 @@ def main():
   predictit_prob = {
       'az':0.64,'wi':0.72,'pa':0.76,'fl':0.62,'mi':0.75,'mn':0.81,
       'nh':0.77,'nc':0.58,'oh':0.45,'ia':0.43,'ga':0.46,'tx':0.37,
-      'nv':0.82
+      'nv':0.82,'mt':0.18,'in':0.15
   }
 
   # Polling advantage for democrats, 2020 jul 16, fivethirtyeight.com.
@@ -37,7 +41,8 @@ def main():
   # Used for two purposes: (1) small tweaks to the "lean" stats, (2) helping me to adjust c parameter.
   poll = {
     'az':2.6,'nv':8.5,'pa':7.7,'fl':6.8,'wi':7.6,'mi':9.1,'mn':10,
-    'nh':8.0,'nc':2.9,'oh':2.2,'ia':-0.7,'ga':0.9,'tx':-0.3
+    'nh':8.0,'nc':2.9,'oh':2.2,'ia':-0.7,'ga':0.9,'tx':-0.3,
+    'mt':-9.3,'in':-11.5
   }
 
   # list of states, sorted in order by probability on predictit
@@ -46,7 +51,7 @@ def main():
 
   safe_d = 212 # includes 3 electoral votes from maine
 
-  safe_r = 127 # includes 1 electoral vote from maine
+  safe_r = 113 # includes 1 electoral vote from maine
 
   n = len(electoral_votes)
   if n!=len(lean):
@@ -104,32 +109,39 @@ def main():
   n_trials = 10000 # number of trials to run
   d_wins = 0
   state_d_wins = {}
+  rcl = {} # republican win conditioned on losing this state
   for state in electoral_votes:
     state_d_wins[state] = 0
+    rcl[state] = 0
   for i in range(n_trials):
     d = safe_d
     pop = a*normal()
+    x = {}
     for state, v in electoral_votes.items():
-      x = pop+ind[state]*normal()+c*(lean[state]+k)
-      if x>0.0:
+      x[state] = pop+ind[state]*normal()+c*(lean[state]+k)
+      if x[state]>0.0:
         d = d+v
         state_d_wins[state] += 1
     if d>tot*0.5:
       # fixme: handle the case of a tie in the electoral college
       d_wins = d_wins+1
+    else:
+      for state in electoral_votes:
+        if x[state]>0.0:
+          rcl[state] += 1
   prob = {}
   for state in states:
     prob[state] = state_d_wins[state]/n_trials
 
-  print("A=",(("%4.1f") % (a)),", k=",(("%3.1f") % (k)))
+  print("A=",f1(a),", k=",f1(k))
   predictit_mean = statistics.mean(list(predictit_prob.values()))
   prob_mean = statistics.mean(list(prob.values()))
-  print("mean(simulation)-mean(predictit)=",(("%5.2f") % (prob_mean-predictit_mean,)),"; if predictit data are current, this can be used to adjust the parameter k")
+  print("mean(simulation)-mean(predictit)=",f2(prob_mean-predictit_mean),"; if predictit data are current, this can be used to adjust the parameter k")
 
   print("prob of D win=",d_wins/n_trials)
-  print("     predictit   sim    polls")
+  print("           predictit   sim   polls     RCL")
   for state in states:
-    print(state," ",lean[state]," ",predictit_prob[state]," ",prob[state]," ",poll[state])
+    print(state," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state]/n_trials))
 
 def correlation_to_weight(rho):
   return math.sqrt(rho**-0.5-1)
@@ -138,6 +150,12 @@ def normal():
   return random.normalvariate(0,1)
 
 def die(message):
-  print(message)
+  sys.exit(message)
+
+def f1(x):
+  return ("%4.1f") % x
+
+def f2(x):
+  return ("%5.2f") % x
 
 main()
