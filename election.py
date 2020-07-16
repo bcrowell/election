@@ -6,7 +6,7 @@ def main():
       'ga':16,'ia':6,'oh':18,'tx':38}
 
   # 2020 jul 15, http://insideelections.com/ratings/president
-  lean = {
+  lean_raw = {
       'az':0,'fl':0,'nc':0,'wi':0,
       'mi':1,'pa':1,
       'mn':2,'nh':2,
@@ -14,8 +14,14 @@ def main():
       'ga':-1,'ia':-1,'oh':-2,'tx':-2
       }
   # tweaks in cases where these expert opinions don't seem consistent with polls and predictit:
-  lean['oh'] += 0.5
-  lean['wi'] += 0.5
+  lean_tweaks = {
+      'oh':0.5,'wi':0.5,'nv':-0.5,'nh':-0.5,'mn':-0.5,'ia':-0.5
+      }
+  lean = {}
+  for state in lean_raw:
+    lean[state] = lean_raw[state]
+    if state in lean_tweaks:
+      lean[state] += lean_tweaks[state]
 
   # Probability that democrats win the state according to
   # predictit, 2020 jul 15.
@@ -54,18 +60,40 @@ def main():
 
   poll_sd = statistics.stdev(list(poll.values()))
   lean_sd = statistics.stdev(list(lean.values()))
-  print("sd(polls)=",poll_sd,", sd(lean)=",lean_sd, "c=",c,", poll/lean=",poll_sd/lean_sd)
+  # print("sd(polls)=",poll_sd,", sd(lean)=",lean_sd," poll/lean=",poll_sd/lean_sd)
 
-  # Parameters a, c, and offset are all in units of percentage points. An overall normalization doesn't affect who wins, but
-  # does affect predictions of vote share, and getting it right makes it easier to think abot whether numbers are reasonable.
-  a = 17.0 # std dev of popular-vote shift between now and election day; adjust so that dems' prob of winning roughly matches betfair's .64
-           # ... but can't realistically get it to go that low
+  """
+  The main parameters that it makes sense to fiddle with are A and k.
+  Parameters A and c are in units of percentage points. An overall normalization doesn't affect who wins, but
+  does affect predictions of vote share, and getting it right makes it easier to think about whether numbers are reasonable.
+  A should go down to about 1.5% by the week before election day.
+
+  What are a priori reasonable values of A and k?
+
+  For A, a poll in Nov 2019 showed that 65% of voters would "definitely vote" for one candidate or the other, and another
+  19% said there was "not really any chance" they would vote for the other. 
+      https://www.statista.com/chart/19872/voters-2020-election-undecided/
+  Although turnout is unpredictable, it doesn't seem like there's room for more than 35% of voters to change
+  their minds, and among those who do change their minds, there is likely to be a lot of cancellation. So I don't see how
+  A can be greater than ~25%.
+
+  For k, setting it to more than ~1 unit means disagreeing significantly with experts, who seem to be expecting reversion
+  to the mean of states' past behavior.
+
+  As of July, setting (A,k)=(10,1) gives reasonably good agreement with predictit for swing-state probabilities, and
+  with betfair for outcome. With my model, it's difficult to simultaneously reproduce predictit's high probabilities
+  for Biden to win states like MN and NV with predictit and betfair's relatively low probabilities for Biden to be elected.
+  Setting (A,k)=(15,0.5) gives predictions that are more like what the experts say for swing states, and reproduces
+  markets' probs for outcome.
+  """
+  a = 15.0 # std dev of popular-vote shift between now and election day
+  k = 0.5 # setting this to a positive value means I don't believe experts who are saying election is close
   # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
   rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
   rho2 = 0.5 # florida
   rho3 = 0.25 # nevada
-  c = 5 # bias per unit of "lean;" adjust so that scatter among probabilities roughly matches predictit
-  offset = 0.8 # add this to "lean" values, otherwise significantly off compared to predictit (and polling)
+  # calibration of "lean" data to give % units
+  c = poll_sd/lean_sd
 
   ind = {} # uncorrelated std dev of each state
   for state in electoral_votes:
@@ -73,27 +101,35 @@ def main():
   ind['fl'] = a*correlation_to_weight(rho2)
   ind['nv'] = a*correlation_to_weight(rho3)
 
-  k = 10000 # number of trials to run
+  n_trials = 10000 # number of trials to run
   d_wins = 0
   state_d_wins = {}
   for state in electoral_votes:
     state_d_wins[state] = 0
-  for i in range(k):
+  for i in range(n_trials):
     d = safe_d
     pop = a*normal()
     for state, v in electoral_votes.items():
-      x = pop+ind[state]*normal()+c*(lean[state]+offset)
+      x = pop+ind[state]*normal()+c*(lean[state]+k)
       if x>0.0:
         d = d+v
         state_d_wins[state] += 1
     if d>tot*0.5:
       # fixme: handle the case of a tie in the electoral college
       d_wins = d_wins+1
+  prob = {}
+  for state in states:
+    prob[state] = state_d_wins[state]/n_trials
 
-  print("prob of D win=",d_wins/k)
+  print("A=",(("%4.1f") % (a)),", k=",(("%3.1f") % (k)))
+  predictit_mean = statistics.mean(list(predictit_prob.values()))
+  prob_mean = statistics.mean(list(prob.values()))
+  print("mean(simulation)-mean(predictit)=",(("%5.2f") % (prob_mean-predictit_mean,)),"; if predictit data are current, this can be used to adjust the parameter k")
+
+  print("prob of D win=",d_wins/n_trials)
   print("     predictit   sim    polls")
   for state in states:
-    print(state," ",lean[state]," ",predictit_prob[state]," ",state_d_wins[state]/k," ",poll[state])
+    print(state," ",lean[state]," ",predictit_prob[state]," ",prob[state]," ",poll[state])
 
 def correlation_to_weight(rho):
   return math.sqrt(rho**-0.5-1)
