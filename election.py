@@ -4,7 +4,7 @@ def main():
   electoral_votes = {'az':11,'fl':29,'nc':15,'wi':10,'mi':16,
       'pa':20,'mn':10,'nh':4,'nv':6,
       'ga':16,'ia':6,'oh':18,'tx':38,
-      'mt':3,'in':11
+      'mt':3,'in':11,'nm':5,'nj':14
     }
 
   # 2020 jul 15, http://insideelections.com/ratings/president
@@ -15,7 +15,7 @@ def main():
       'nv':3,
       'ga':-1,'ia':-1,'oh':-2,'tx':-2,
        # my own additions:
-      'mt':-7,'in':-9
+      'mt':-4,'in':-4,'nm':4,'nj':4
       }
   # tweaks in cases where these expert opinions don't seem consistent with polls and predictit:
   lean_tweaks = {
@@ -33,7 +33,7 @@ def main():
   predictit_prob = {
       'az':0.64,'wi':0.72,'pa':0.76,'fl':0.62,'mi':0.75,'mn':0.81,
       'nh':0.77,'nc':0.58,'oh':0.45,'ia':0.43,'ga':0.46,'tx':0.37,
-      'nv':0.82,'mt':0.18,'in':0.15
+      'nv':0.82,'mt':0.18,'in':0.15,'nm':0.91,'nj':0.94
   }
 
   # Polling advantage for democrats, 2020 jul 16, fivethirtyeight.com.
@@ -42,14 +42,14 @@ def main():
   poll = {
     'az':2.6,'nv':8.5,'pa':7.7,'fl':6.8,'wi':7.6,'mi':9.1,'mn':10,
     'nh':8.0,'nc':2.9,'oh':2.2,'ia':-0.7,'ga':0.9,'tx':-0.3,
-    'mt':-9.3,'in':-11.5
+    'mt':-9.3,'in':-11.5,'nm':14,'nj':22
   }
 
   # list of states, sorted in order by probability on predictit
   states = list(electoral_votes.keys())
   states.sort(key=lambda s:predictit_prob[s])
 
-  safe_d = 212 # includes 3 electoral votes from maine
+  safe_d = 193 # includes 3 electoral votes from maine
 
   safe_r = 113 # includes 1 electoral vote from maine
 
