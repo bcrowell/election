@@ -1,12 +1,22 @@
 import math,random,statistics,sys
 
 def main():
+
+  """
+  Number of electoral votes for each swing state, for 2010-2020.
+  Any state on this list must also have data in lean_raw[], predictit_prob[], and poll[].
+  """
   electoral_votes = {'az':11,'fl':29,'nc':15,'wi':10,'mi':16,
       'pa':20,'mn':10,'nh':4,'nv':6,
       'ga':16,'ia':6,'oh':18,'tx':38,
       'mt':3,'in':11,'nm':5,'nj':14
     }
+  safe_d = 193 # includes 3 electoral votes from maine
+  safe_r = 113 # includes 1 electoral vote from maine
 
+
+  # Semi-quantitative rankings of how much each state leans toward one party or another.
+  # Positive = democratic.
   # 2020 jul 15, http://insideelections.com/ratings/president
   lean_raw = {
       'az':0,'fl':0,'nc':0,'wi':0,
@@ -17,28 +27,33 @@ def main():
        # my own additions:
       'mt':-4,'in':-4,'nm':4,'nj':4
       }
-  # tweaks in cases where these expert opinions don't seem consistent with polls and predictit:
+  # My tweaks in cases where these expert opinions don't seem consistent with polls and predictit:
   lean_tweaks = {
       'oh':0.5,'wi':0.5,'nv':-0.5,'nh':-0.5,'mn':-0.5,'ia':-0.5
       }
+  # In addition to these per-state tweaks, all values have the parameter k added to them later.
   lean = {}
   for state in lean_raw:
     lean[state] = lean_raw[state]
     if state in lean_tweaks:
       lean[state] += lean_tweaks[state]
 
-  # Probability that democrats win the state according to
-  # predictit, 2020 jul 15.
-  # Not used in calculations, only in output, to help me adjust parameters.
+  """
+  Probability that democrats win the state according to
+  predictit, 2020 jul 15.
+  Not used in calculations, only in output, to help me adjust parameters.
+  """
   predictit_prob = {
       'az':0.64,'wi':0.72,'pa':0.76,'fl':0.62,'mi':0.75,'mn':0.81,
       'nh':0.77,'nc':0.58,'oh':0.45,'ia':0.43,'ga':0.46,'tx':0.37,
       'nv':0.82,'mt':0.18,'in':0.15,'nm':0.91,'nj':0.94
   }
 
-  # Polling advantage for democrats, 2020 jul 16, fivethirtyeight.com.
-  # Not used in simulations, only in output.
-  # Used for two purposes: (1) small tweaks to the "lean" stats, (2) helping me to adjust c parameter.
+  """
+  Polling advantage for democrats, 2020 jul 16, fivethirtyeight.com.
+  Used for two purposes: (1) used automatically to normalize the c parameter;
+  (2) helps me to decide on lean_tweaks[].
+  """
   poll = {
     'az':2.6,'nv':8.5,'pa':7.7,'fl':6.8,'wi':7.6,'mi':9.1,'mn':10,
     'nh':8.0,'nc':2.9,'oh':2.2,'ia':-0.7,'ga':0.9,'tx':-0.3,
@@ -48,10 +63,6 @@ def main():
   # list of states, sorted in order by probability on predictit
   states = list(electoral_votes.keys())
   states.sort(key=lambda s:predictit_prob[s])
-
-  safe_d = 193 # includes 3 electoral votes from maine
-
-  safe_r = 113 # includes 1 electoral vote from maine
 
   n = len(electoral_votes)
   if n!=len(lean):
@@ -68,7 +79,9 @@ def main():
   # print("sd(polls)=",poll_sd,", sd(lean)=",lean_sd," poll/lean=",poll_sd/lean_sd)
 
   """
-  The main parameters that it makes sense to fiddle with are A and k.
+  Set adjustable parameters. The main parameters that it makes sense to fiddle with are A and k.
+  A = std dev of popular-vote shift between now and election day
+  k = offset to lean[] values; setting this to a positive value means I don't believe experts who are saying election is close
   Parameters A and c are in units of percentage points. An overall normalization doesn't affect who wins, but
   does affect predictions of vote share, and getting it right makes it easier to think about whether numbers are reasonable.
   A should go down to about 1.5% by the week before election day.
@@ -91,8 +104,8 @@ def main():
   Setting (A,k)=(15,0.5) gives predictions that are more like what the experts say for swing states, and reproduces
   markets' probs for outcome.
   """
-  a = 15.0 # std dev of popular-vote shift between now and election day
-  k = 0.5 # setting this to a positive value means I don't believe experts who are saying election is close
+  a = 15.0 # see above
+  k = 0.5 # see above
   # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
   rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
   rho2 = 0.5 # florida
