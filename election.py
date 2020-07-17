@@ -9,9 +9,10 @@ def main():
   electoral_votes = {'az':11,'fl':29,'nc':15,'wi':10,'mi':16,
       'pa':20,'mn':10,'nh':4,'nv':6,
       'ga':16,'ia':6,'oh':18,'tx':38,
-      'mt':3,'in':11,'nm':5,'nj':14
+      'mt':3,'in':11,'nm':5,'nj':14,
+      'va':13,'or':7,'co':9,'ca':55,'ny':29,'wa':12
     }
-  safe_d = 193 # includes 3 electoral votes from maine
+  safe_d =  68 # includes 3 electoral votes from maine
   safe_r = 113 # includes 1 electoral vote from maine
 
 
@@ -25,7 +26,8 @@ def main():
       'nv':3,
       'ga':-1,'ia':-1,'oh':-2,'tx':-2,
        # my own additions:
-      'mt':-4,'in':-4,'nm':4,'nj':4
+      'mt':-4,'in':-4,'nm':4,'nj':4,
+      'va':4,'co':4,'or':4.5,'ca':4.5,'ny':4.5,'wa':4.5
       }
   # My tweaks in cases where these expert opinions don't seem consistent with polls and predictit:
   lean_tweaks = {
@@ -46,7 +48,8 @@ def main():
   predictit_prob = {
       'az':0.64,'wi':0.72,'pa':0.76,'fl':0.62,'mi':0.75,'mn':0.81,
       'nh':0.77,'nc':0.58,'oh':0.45,'ia':0.43,'ga':0.46,'tx':0.37,
-      'nv':0.82,'mt':0.18,'in':0.15,'nm':0.91,'nj':0.94
+      'nv':0.82,'mt':0.18,'in':0.15,'nm':0.91,'nj':0.94,
+      'va':0.91,'or':0.95,'co':0.91,'ca':0.95,'ny':0.96,'wa':0.95
   }
 
   """
@@ -57,7 +60,9 @@ def main():
   poll = {
     'az':2.6,'nv':8.5,'pa':7.7,'fl':6.8,'wi':7.6,'mi':9.1,'mn':10,
     'nh':8.0,'nc':2.9,'oh':2.2,'ia':-0.7,'ga':0.9,'tx':-0.3,
-    'mt':-9.3,'in':-11.5,'nm':14,'nj':22
+    'mt':-9.3,'in':-11.5,'nm':14,'nj':22,
+    'va':11,'co':17,'ca':29.6,'ny':26.1,'wa':24.8,
+    'or':22 # no actual polling data for oregon, so this is just a guess based on other states with similar probs on predictit 
   }
 
   # list of states, sorted in order by probability on predictit
@@ -115,9 +120,10 @@ def main():
   the per-state variation only turns out to contribute about half the variance. This is too small, since state polling
   generally has about twice the error of national polling, and therefore we want per-state variation to be about twice
   as big as we would get from the rho values. This is the reason for including the fudge factor s and setting it to
-  about 2. The effect of making s>1 is to make the underdog less likely to win. The reason for this is that if the
-  underdog is to win, there has to be a big nationwide change, but for larger s, variability of each state makes this
-  impossible because states' randomness swamps any such "cooperation."
+  about 2. The effect of making s>1 can counterintuitively be to make the underdog less likely to win. The reason for this is
+  is that (1) that variability doesn't help them much, because the underdog needs big correlated change, not uncorrelated change;
+  and (2) the model counts some states as safe, but in the limit as s->infty whoever has more safe electoral votes has the higher
+  probability of winning.
   """
   a = 9.0 # see above for how this should go down over time
   k = 0.5 # see above
