@@ -79,12 +79,13 @@ def main():
   # print("sd(polls)=",poll_sd,", sd(lean)=",lean_sd," poll/lean=",poll_sd/lean_sd)
 
   """
-  Set adjustable parameters. The main parameters that it makes sense to fiddle with are A and k.
+  Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, and d.
   A = std dev of popular-vote shift between now and election day
   k = offset to lean[] values; setting this to a positive value means I don't believe experts who are saying election is close
+  s = a fudge factor for variability of state votes, see below
   Parameters A and c are in units of percentage points. An overall normalization doesn't affect who wins, but
   does affect predictions of vote share, and getting it right makes it easier to think about whether numbers are reasonable.
-  A should go down to about 1.5% by the week before election day.
+  A should go down to about 5% by the week before election day.
 
   What are a priori reasonable values of A and k?
 
@@ -95,17 +96,32 @@ def main():
   their minds, and among those who do change their minds, there is likely to be a lot of cancellation. So I don't see how
   A can be greater than ~25%.
 
+  "[State polls taken during the last 21 days before election day] had a weighted average error of 5.3 points"
+  https://fivethirtyeight.com/features/how-accurate-have-state-polls-been/
+  This is about double the error for national polls. That partly means that states are really more variable, and
+  partly that state polling isn't as good or intensive.
+
+  For national popular-vote polls, twelve months out, the average absolute error is about 12%, 4 months out is 9%,
+  and in the final month 2.5%.
+  https://politics.stackexchange.com/questions/54680/historical-data-on-how-the-reliability-of-polling-data-depends-on-time-remaining
+
+  So reasonable estimates for A, which measures national vote uncertainty, are: July 9%, November 2.5%.
+
   For k, setting it to more than ~1 unit means disagreeing significantly with experts, who seem to be expecting reversion
   to the mean of states' past behavior.
 
-  As of July, setting (A,k)=(10,1) gives reasonably good agreement with predictit for swing-state probabilities, and
-  with betfair for outcome. With my model, it's difficult to simultaneously reproduce predictit's high probabilities
-  for Biden to win states like MN and NV with predictit and betfair's relatively low probabilities for Biden to be elected.
-  Setting (A,k)=(15,0.5) gives predictions that are more like what the experts say for swing states, and reproduces
-  markets' probs for outcome.
+  The rho values I'm using are correlations are state A with state B. I want mine to be state with national, but that should be about the same.
+  However, if I just take the per-state variation to be what would mathematically reproduce these rho values, then
+  the per-state variation only turns out to contribute about half the variance. This is too small, since state polling
+  generally has about twice the error of national polling, and therefore we want per-state variation to be about twice
+  as big as we would get from the rho values. This is the reason for including the fudge factor s and setting it to
+  about 2. The effect of making s>1 is to make the underdog less likely to win. The reason for this is that if the
+  underdog is to win, there has to be a big nationwide change, but for larger s, variability of each state makes this
+  impossible because states' randomness swamps any such "cooperation."
   """
-  a = 15.0 # see above
+  a = 9.0 # see above for how this should go down over time
   k = 0.5 # see above
+  s = 2.0
   # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
   rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
   rho2 = 0.5 # florida
@@ -115,9 +131,11 @@ def main():
 
   ind = {} # uncorrelated std dev of each state
   for state in electoral_votes:
-    ind[state] = a*correlation_to_weight(rho1)
-  ind['fl'] = a*correlation_to_weight(rho2)
-  ind['nv'] = a*correlation_to_weight(rho3)
+    ind[state] = correlation_to_weight(rho1)
+  ind['fl'] = correlation_to_weight(rho2)
+  ind['nv'] = correlation_to_weight(rho3)
+  for state in electoral_votes:
+    ind[state] *= (a*s)
 
   n_trials = 10000 # number of trials to run
   d_wins = 0
@@ -146,7 +164,7 @@ def main():
   for state in states:
     prob[state] = state_d_wins[state]/n_trials
 
-  print("A=",f1(a),", k=",f1(k))
+  print("A=",f1(a),", k=",f1(k),", s=",f1(s))
   predictit_mean = statistics.mean(list(predictit_prob.values()))
   prob_mean = statistics.mean(list(prob.values()))
   print("mean(simulation)-mean(predictit)=",f2(prob_mean-predictit_mean),"; if predictit data are current, this can be used to adjust the parameter k")
