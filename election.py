@@ -169,6 +169,8 @@ def main():
   prob = {}
   for state in states:
     prob[state] = state_d_wins[state]/n_trials
+    rcl[state] = rcl[state]/(n_trials*prob[state]) # number of times the joint event happened, divided by the number of times the
+                                                   # even conditioned on happened
 
   print("A=",f1(a),", k=",f1(k),", s=",f1(s))
   predictit_mean = statistics.mean(list(predictit_prob.values()))
@@ -178,7 +180,7 @@ def main():
   print("prob of D win=",d_wins/n_trials)
   print("           predictit   sim   polls     RCL")
   for state in states:
-    print(state," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state]/n_trials))
+    print(state," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state]))
 
 def correlation_to_weight(rho):
   return math.sqrt(rho**-0.5-1)
