@@ -85,7 +85,7 @@ def main():
 
   '''
   Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, and d.
-  A = std dev of popular-vote shift between now and election day
+  A = mean absolute error of popular-vote shift between now and election day
   k = offset to lean[] values; setting this to a positive value means I don't believe experts who are saying election is close
   s = a fudge factor for variability of state votes, see below
   Parameters A and c are in units of percentage points. An overall normalization doesn't affect who wins, but
@@ -112,6 +112,13 @@ def main():
 
   So reasonable estimates for A, which measures national vote uncertainty, are: July 9%, November 2.5%.
 
+  All of the above assumes a normal distribution, but I doubt that real political fluctuations have tails as skinny as
+  those of a normal distribution. Epidemics and volcanoes happen, etc. I currently have dist=cauchy rather than normal.
+  My data sources for A express central tendency as mean absolute error, so when dist='normal', we pick the standard
+  deviation sigma to reproduce this for a normal distribution. For a Cauchy distribution, the mean absolute error is
+  undefined. Therefore when dist='cauchy', we pick a Cauchy distribution with the same interquartile range. In July 2020,
+  this has the effect of making the per-state probabilities agree worse with predictit, but I think this is reasonable.
+
   For k, setting it to more than ~1 unit means disagreeing significantly with experts, who seem to be expecting reversion
   to the mean of states' past behavior.
 
@@ -128,6 +135,7 @@ def main():
   a = 9.0 # see above for how this should go down over time
   k = 0.5 # see above
   s = 2.0 # see above
+  dist = 'cauchy' # can be cauchy or normal
   # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
   rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
   rho2 = 0.5 # florida
@@ -135,13 +143,16 @@ def main():
   # calibration of "lean" data to give % units
   c = poll_sd/lean_sd
 
+  aa = math.sqrt(math.pi/2.0)*a # Convert mean absolute value to std dev, assuming normal, even if normal isn't what we're actually using.
+                                # See notes on how choice of distribution function affects A.
+
   ind = {} # uncorrelated std dev of each state
   for state in electoral_votes:
     ind[state] = correlation_to_weight(rho1)
   ind['fl'] = correlation_to_weight(rho2)
   ind['nv'] = correlation_to_weight(rho3)
   for state in electoral_votes:
-    ind[state] *= (a*s)
+    ind[state] *= (aa*s)
 
   n_trials = 10000 # number of trials to run
   d_wins = 0
@@ -152,10 +163,10 @@ def main():
     rcl[state] = 0
   for i in range(n_trials):
     d = safe_d
-    pop = a*bell_curve()
+    pop = aa*bell_curve(dist)
     x = {}
     for state, v in electoral_votes.items():
-      x[state] = pop+ind[state]*bell_curve()+c*(lean[state]+k)
+      x[state] = pop+ind[state]*bell_curve(dist)+c*(lean[state]+k)
       if x[state]>0.0:
         d = d+v
         state_d_wins[state] += 1
@@ -172,7 +183,9 @@ def main():
     rcl[state] = rcl[state]/(n_trials*prob[state]) # number of times the joint event happened, divided by the number of times the
                                                    # even conditioned on happened
 
-  print("A=",f1(a),", k=",f1(k),", s=",f1(s))
+  print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist)
+  if dist=='cauchy':
+    print("Note: Since dist is Cauchy, which has fat tails probabilities for safe states are less extreme. This is intentional.")
   predictit_mean = statistics.mean(list(predictit_prob.values()))
   prob_mean = statistics.mean(list(prob.values()))
   print("mean(simulation)-mean(predictit)=",f2(prob_mean-predictit_mean),"; if predictit data are current, this can be used to adjust the parameter k")
@@ -185,8 +198,13 @@ def main():
 def correlation_to_weight(rho):
   return math.sqrt(rho**-0.5-1)
 
-def bell_curve():
-  return cauchy() # can call either normal() or cauchy()
+def bell_curve(dist):
+  # See notes about how choice of dist affects A.
+  if dist=='normal':
+    return normal()
+  if dist=='cauchy':
+    return cauchy()
+  die("illegal value of dist in bell_curve")
 
 def cauchy():
   """
