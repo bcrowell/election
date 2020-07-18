@@ -41,8 +41,14 @@ def main():
 
   # Calculate a measure of the spread in the lean[] values and the poll[] values, to allow the normalization parameter
   # c to be calculated. I.e., how many % points is one unit of "lean?"
-  poll_sd = statistics.stdev(list(poll.values()))
-  lean_sd = statistics.stdev(list(lean.values()))
+  swing_poll_list = []
+  swing_lean_list = []
+  for state in poll:
+    if abs(lean[state])<4: # Don't count states with huge lean values, not real swing states, because those values aren't carefully calibrated.
+      swing_poll_list.append(poll[state])
+      swing_lean_list.append(lean[state])
+  poll_sd = statistics.stdev(swing_poll_list)
+  lean_sd = statistics.stdev(swing_lean_list)
 
   '''
   Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, d, and dist.
@@ -96,8 +102,11 @@ def main():
   prob = {}
   for state in states:
     prob[state] = state_d_wins[state]/n_trials
-    rcl[state] = rcl[state]/(n_trials*prob[state]) # number of times the joint event happened, divided by the number of times the
-                                                   # even conditioned on happened
+    if prob[state]>0.0:
+      rcl[state] = rcl[state]/(n_trials*prob[state]) # number of times the joint event happened, divided by the number of times the
+                                                     # even conditioned on happened
+    else:
+      rcl[state] = None
 
   print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist)
   if dist=='cauchy':
@@ -140,9 +149,16 @@ def die(message):
   sys.exit(message)
 
 def f1(x):
-  return ("%4.1f") % x
+  if x is None:
+    return "----"
+  else:
+    return ("%4.1f") % x
 
 def f2(x):
-  return ("%5.2f") % x
+  if x is None:
+    return "-----"
+  else:
+    return ("%5.2f") % x
+
 
 main()
