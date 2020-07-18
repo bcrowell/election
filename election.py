@@ -1,69 +1,27 @@
-import math,random,statistics,sys
+import math,random,statistics,sys,csv
 
 def main():
 
-  '''
-  Number of electoral votes for each swing state, for 2010-2020.
-  Any state on this list must also have data in lean_raw[], predictit_prob[], and poll[].
-  '''
-  electoral_votes = {'az':11,'fl':29,'nc':15,'wi':10,'mi':16,
-      'pa':20,'mn':10,'nh':4,'nv':6,
-      'ga':16,'ia':6,'oh':18,'tx':38,
-      'mt':3,'in':11,'nm':5,'nj':14,
-      'va':13,'or':7,'co':9,'ca':55,'ny':29,'wa':12
-    }
+  electoral_votes = {}
+  lean = {}
+  predictit_prob = {}
+  poll = {}
+  with open('data.csv', newline='') as csv_file:
+    csv_reader = csv.reader(csv_file)
+    titles = True
+    for row in csv_reader:
+      if titles:
+        titles = False
+        continue
+      state = row[0]
+      electoral_votes[state] = int(row[1])
+      lean[state] = float(row[2])
+      predictit_prob[state] = float(row[3])
+      poll[state] = float(row[4])
+
+  # Safe states are those that don't occur in the data file.
   safe_d =  68 # includes 3 electoral votes from maine
   safe_r = 113 # includes 1 electoral vote from maine
-
-
-  # Semi-quantitative rankings of how much each state leans toward one party or another.
-  # Positive = democratic.
-  # 2020 jul 15, http://insideelections.com/ratings/president
-  lean_raw = {
-      'az':0,'fl':0,'nc':0,'wi':0,
-      'mi':1,'pa':1,
-      'mn':2,'nh':2,
-      'nv':3,
-      'ga':-1,'ia':-1,'oh':-2,'tx':-2,
-       # my own additions:
-      'mt':-4,'in':-4,'nm':4,'nj':4,
-      'va':4,'co':4,'or':4.5,'ca':4.5,'ny':4.5,'wa':4.5
-      }
-  # My tweaks in cases where these expert opinions don't seem consistent with polls and predictit:
-  lean_tweaks = {
-      'oh':0.5,'wi':0.5,'nv':-0.5,'nh':-0.5,'mn':-0.5,'ia':-0.5
-      }
-  # In addition to these per-state tweaks, all values have the parameter k added to them later.
-  lean = {}
-  for state in lean_raw:
-    lean[state] = lean_raw[state]
-    if state in lean_tweaks:
-      lean[state] += lean_tweaks[state]
-
-  '''
-  Probability that democrats win the state according to
-  predictit, 2020 jul 15.
-  Not used in calculations, only in output, to help me adjust parameters.
-  '''
-  predictit_prob = {
-      'az':0.64,'wi':0.72,'pa':0.76,'fl':0.62,'mi':0.75,'mn':0.81,
-      'nh':0.77,'nc':0.58,'oh':0.45,'ia':0.43,'ga':0.46,'tx':0.37,
-      'nv':0.82,'mt':0.18,'in':0.15,'nm':0.91,'nj':0.94,
-      'va':0.91,'or':0.95,'co':0.91,'ca':0.95,'ny':0.96,'wa':0.95
-  }
-
-  '''
-  Polling advantage for democrats, 2020 jul 16, fivethirtyeight.com.
-  Used for two purposes: (1) used automatically to normalize the c parameter;
-  (2) helps me to decide on lean_tweaks[].
-  '''
-  poll = {
-    'az':2.6,'nv':8.5,'pa':7.7,'fl':6.8,'wi':7.6,'mi':9.1,'mn':10,
-    'nh':8.0,'nc':2.9,'oh':2.2,'ia':-0.7,'ga':0.9,'tx':-0.3,
-    'mt':-9.3,'in':-11.5,'nm':14,'nj':22,
-    'va':11,'co':17,'ca':29.6,'ny':26.1,'wa':24.8,
-    'or':22 # no actual polling data for oregon, so this is just a guess based on other states with similar probs on predictit 
-  }
 
   # list of states, sorted in order by probability on predictit
   states = list(electoral_votes.keys())
