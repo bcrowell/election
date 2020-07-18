@@ -6,7 +6,7 @@ def parameters():
   See README for how to decide on these values.
   Fixme: Defaults should be read from a data file, and should be able to be overridden from the command line.
   '''
-  a = 9.0 # see above for how this should go down over time
+  a = 4.5 # 9.0 # see above for how this should go down over time
   k = 0.5 # see above
   s = 2.0 # see above
   dist = 'cauchy' # can be cauchy or normal
@@ -85,7 +85,8 @@ def output(pars,results,sd):
     print("Note: Since dist is Cauchy, which has fat tails, probabilities for safe states are less extreme. This is intentional.")
   predictit_mean = statistics.mean(list(predictit_prob.values()))
   prob_mean = statistics.mean(list(prob.values()))
-  print("mean(simulation)-mean(predictit)=",f2(prob_mean-predictit_mean),"; if predictit data are current, this can be used to adjust the parameter k")
+  #print("mean(simulation)-mean(predictit)=",f2(prob_mean-predictit_mean),"; if predictit data are current, this can be used to adjust the parameter k")
+  #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
   print("           predictit   sim   polls     RCL")

@@ -1,10 +1,25 @@
 election
 ========
 
-A very simple python 3 program that simulates a US presidential election and
-estimates probabilities. It can be used to estimate conditional or joint probabilities,
-such as the probability that Trump wins the presidential election while losing in
-Pennsylvania.
+This is very simple program that simulates a US presidential election
+and estimates various probabilities. The reason I wrote it is that,
+although professionals publish the results of much fancier models, I
+wanted to be able to estimate probabilities of more specialized things
+like the probability that Trump would win the presidential election
+while losing in Pennsylvania.
+
+The design of the model makes it useful in checking whether opinion A
+is consistent with opinion B. For example, on the prediction market
+predictit, people are currently (July 2020) saying that Biden has a 62% chance
+of winning the election, and a 76% chance of winning Pennsylvania.
+The model helps me confirm my hunch that one or the other of these
+opinions has to be wrong. I can adjust the amount of randomness in the
+model to reproduce one of these numbers, but not both at the same time.
+
+The model is not useful for predicting the popular vote (its expectation
+value or its probability distribution). It doesn't even have data on
+all the states --- small solid-red states are all lumped together, as are
+small solid-blue states.
 
 How the model works
 ===================
