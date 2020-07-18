@@ -1,7 +1,6 @@
 import math,random,statistics,sys,csv
 
-def main():
-
+def parameters():
   '''
   Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, s, and dist.
   See README for how to decide on these values.
@@ -10,11 +9,15 @@ def main():
   k = 0.5 # see above
   s = 2.0 # see above
   dist = 'cauchy' # can be cauchy or normal
+
   # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
   rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
   rho2 = 0.5 # florida
   rho3 = 0.25 # nevada
 
+  return {'a':a,'k':k,'s':s,'dist':dist,'rho':(rho1,rho2,rho3)}
+
+def state_data():
   electoral_votes = {}
   lean = {}
   predictit_prob = {}
@@ -32,17 +35,13 @@ def main():
       predictit_prob[state] = float(row[3])
       poll[state] = float(row[4])
 
-  # Safe states are those that don't occur in the data file.
-  safe_d =  68 # includes 3 electoral votes from maine
-  safe_r = 113 # includes 1 electoral vote from maine
-
   # list of states, sorted in order by probability on predictit
   states = list(electoral_votes.keys())
   states.sort(key=lambda s:predictit_prob[s])
 
-  n = len(electoral_votes)
-  if n!=len(lean):
-    die('n does not match')
+  # Safe states are those that don't occur in the data file.
+  safe_d =  68 # includes 3 electoral votes from maine
+  safe_r = 113 # includes 1 electoral vote from maine
 
   # Check that the total number of electoral votes is what it should be. This value doesn't change when there's a census, because
   # it's capped by statute at this value: https://en.wikipedia.org/wiki/United_States_congressional_apportionment
@@ -51,6 +50,22 @@ def main():
     tot = tot+v
   if tot!=538:
     die("tot does not equal 538")
+
+  return {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
+            'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states}
+
+def main():
+
+  pars = parameters()
+  (a,k,s,dist,rho) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'])
+  (rho1,rho2,rho3) = rho
+
+  sd = state_data()
+  (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states) = (sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
+            sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'])
+
+  n = len(electoral_votes) # number of swing states
+
 
   # Calculate a measure of the spread in the lean[] values and the poll[] values, to allow the normalization parameter
   # c to be calculated. I.e., how many % points is one unit of "lean?"

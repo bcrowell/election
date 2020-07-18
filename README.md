@@ -46,13 +46,18 @@ After this is some state-by-state data. Here are the first few lines of a run:
 Four of these columns are just a recap of inputs from data.csv.
 The "sim" column shows the probability from the simulation that
 this state will go democratic. The RCL column gives the probability
-that the R candidate will will the election, conditioned on the hypothesis
+that the R candidate will win the election, conditioned on the hypothesis
 that he loses this state.
 
 Data file and sources of data
 =============================
 
-Per-state data are in the file data.csv.
+Per-state data are in the file data.csv. States that don't appear in the file are
+considered totally safe for one party, and are accounted for in the variables
+safe_d and safe_r in the code. If putting a state in or taking one out, these
+two variables need to be adjusted, or an error will result because the code detects
+that the total number of electoral votes is wrong. Maine is counted as two separate
+safe states, a safe D state with 3 electoral votes and a safe R state with 1.
 
 electoral votes
 ---------------
@@ -68,7 +73,9 @@ Positive = democratic.
 2020 jul 15, http://insideelections.com/ratings/president
 
 I added half-unit tweaks in cases where these expert opinions didn't seem consistent with polls and predictit.
-In addition to these per-state tweaks, all values have the parameter k added to them later.
+In addition to these per-state tweaks, all values have the parameter k added to them later. I also made up
+values like +5 and -6 for states that insideelections simply describes as safe; these were cooked up in
+order to get rough agreement with predictit.
 
 predictit_prob
 --------------
