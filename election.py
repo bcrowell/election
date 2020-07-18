@@ -2,10 +2,10 @@ import math,random,statistics,sys
 
 def main():
 
-  """
+  '''
   Number of electoral votes for each swing state, for 2010-2020.
   Any state on this list must also have data in lean_raw[], predictit_prob[], and poll[].
-  """
+  '''
   electoral_votes = {'az':11,'fl':29,'nc':15,'wi':10,'mi':16,
       'pa':20,'mn':10,'nh':4,'nv':6,
       'ga':16,'ia':6,'oh':18,'tx':38,
@@ -40,11 +40,11 @@ def main():
     if state in lean_tweaks:
       lean[state] += lean_tweaks[state]
 
-  """
+  '''
   Probability that democrats win the state according to
   predictit, 2020 jul 15.
   Not used in calculations, only in output, to help me adjust parameters.
-  """
+  '''
   predictit_prob = {
       'az':0.64,'wi':0.72,'pa':0.76,'fl':0.62,'mi':0.75,'mn':0.81,
       'nh':0.77,'nc':0.58,'oh':0.45,'ia':0.43,'ga':0.46,'tx':0.37,
@@ -52,11 +52,11 @@ def main():
       'va':0.91,'or':0.95,'co':0.91,'ca':0.95,'ny':0.96,'wa':0.95
   }
 
-  """
+  '''
   Polling advantage for democrats, 2020 jul 16, fivethirtyeight.com.
   Used for two purposes: (1) used automatically to normalize the c parameter;
   (2) helps me to decide on lean_tweaks[].
-  """
+  '''
   poll = {
     'az':2.6,'nv':8.5,'pa':7.7,'fl':6.8,'wi':7.6,'mi':9.1,'mn':10,
     'nh':8.0,'nc':2.9,'oh':2.2,'ia':-0.7,'ga':0.9,'tx':-0.3,
@@ -83,7 +83,7 @@ def main():
   lean_sd = statistics.stdev(list(lean.values()))
   # print("sd(polls)=",poll_sd,", sd(lean)=",lean_sd," poll/lean=",poll_sd/lean_sd)
 
-  """
+  '''
   Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, and d.
   A = std dev of popular-vote shift between now and election day
   k = offset to lean[] values; setting this to a positive value means I don't believe experts who are saying election is close
@@ -124,10 +124,10 @@ def main():
   is that (1) that variability doesn't help them much, because the underdog needs big correlated change, not uncorrelated change;
   and (2) the model counts some states as safe, but in the limit as s->infty whoever has more safe electoral votes has the higher
   probability of winning.
-  """
+  '''
   a = 9.0 # see above for how this should go down over time
   k = 0.5 # see above
-  s = 2.0
+  s = 2.0 # see above
   # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
   rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
   rho2 = 0.5 # florida
@@ -152,10 +152,10 @@ def main():
     rcl[state] = 0
   for i in range(n_trials):
     d = safe_d
-    pop = a*normal()
+    pop = a*bell_curve()
     x = {}
     for state, v in electoral_votes.items():
-      x[state] = pop+ind[state]*normal()+c*(lean[state]+k)
+      x[state] = pop+ind[state]*bell_curve()+c*(lean[state]+k)
       if x[state]>0.0:
         d = d+v
         state_d_wins[state] += 1
@@ -184,6 +184,20 @@ def main():
 
 def correlation_to_weight(rho):
   return math.sqrt(rho**-0.5-1)
+
+def bell_curve():
+  return cauchy() # can call either normal() or cauchy()
+
+def cauchy():
+  """
+  Generate a Cauchy random variable with center 1 and the same interquartile range as a standard normal curve.
+  Use this rather than a normal curve to get fatter tails and more spice.
+  https://math.stackexchange.com/questions/484395/how-to-generate-a-cauchy-random-variable
+  https://en.wikipedia.org/wiki/Cauchy_distribution
+  """
+  y = random.random()
+  scale = 1.34896/2.0 # interquartile range of standard normal is 1.35..., of Cauchy(0,1) is 2
+  return scale*math.tan(math.pi*(y-0.5))
 
 def normal():
   return random.normalvariate(0,1)
