@@ -6,12 +6,38 @@ estimates probabilities. It can be used to estimate conditional or joint probabi
 such as the probability that Trump wins the presidential election while losing in
 Pennsylvania.
 
+How the model works
+===================
+
+Each state has a "lean" value, usually originating from insideelections.com. Zero means
+a toss-up, positive values mean it leans D. For convenience, these are multiplied by a factor to get
+them in the same % units as polling results. The result is a currently estimated margin for the democrats.
+(These could also have just been taken directly from polling, but I decided to put more emphasis on
+experts' opinions.)
+
+The simulation is run n times. Each time, a single random number is
+generated from a bell-shaped distribution (normal or Cauchy) with
+width A, and this is added onto every state's estimated margin. In
+addition, every state gets its own random number added on. All these
+random numbers represent both polling error and the fact that things
+can happen between now and election day, e.g., a war or an epidemic.
+The parameter A should be reduced as we get closer to election day;
+see below.
+
+Florida and Nevada have more individual randomness than the other swing states, as suggested
+by some data I found online showing them to be not as strongly correlated with
+the other swing states, which are mostly in the northeast.
+
+The result for a particular state depends on whether the sum described above is positive (goes democratic)
+or negative (republican). The state's electoral votes are counted, and the result of the election
+is determined for that particular election.
+
 Output
 ======
 The main output is a summary of the adjustable parameters followed by
 a predicted probability for the D candidate to win.
 
-Here are some lines from the state-by-state portion of a real run:
+After this is some state-by-state data. Here are the first few lines of a run:
 
                predictit   sim   polls     RCL
     in   -4.0      0.15    0.25   -11.5    0.09
@@ -65,7 +91,7 @@ The main parameters that it makes sense to fiddle with are A, k, s, and dist.
 
 A = mean absolute error of popular-vote shift between now and election day
 
-k = offset to lean[] values; setting this to a positive value means I don't believe experts who are saying election is close
+k = offset to lean[] values; setting this to a positive value favors D candidate, means I don't believe experts who are saying the 2020 election is close
 
 s = a fudge factor for variability of state votes, see below
 
