@@ -73,6 +73,8 @@ def main():
   if n!=len(lean):
     die('n does not match')
 
+  # Check that the total number of electoral votes is what it should be. This value doesn't change when there's a census, because
+  # it's capped by statute at this value: https://en.wikipedia.org/wiki/United_States_congressional_apportionment
   tot = safe_d + safe_r
   for state, v in electoral_votes.items():
     tot = tot+v
