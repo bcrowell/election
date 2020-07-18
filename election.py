@@ -81,9 +81,10 @@ def main():
   if tot!=538:
     die("tot does not equal 538")
 
+  # Calculate a measure of the spread in the lean[] values and the poll[] values, to allow the normalization parameter
+  # c to be calculated. I.e., how many % points is one unit of "lean?"
   poll_sd = statistics.stdev(list(poll.values()))
   lean_sd = statistics.stdev(list(lean.values()))
-  # print("sd(polls)=",poll_sd,", sd(lean)=",lean_sd," poll/lean=",poll_sd/lean_sd)
 
   '''
   Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, and d.
@@ -92,7 +93,6 @@ def main():
   s = a fudge factor for variability of state votes, see below
   Parameters A and c are in units of percentage points. An overall normalization doesn't affect who wins, but
   does affect predictions of vote share, and getting it right makes it easier to think about whether numbers are reasonable.
-  A should go down to about 5% by the week before election day.
 
   What are a priori reasonable values of A and k?
 
@@ -119,9 +119,9 @@ def main():
   My data sources for A express central tendency as mean absolute error, so when dist='normal', we pick the standard
   deviation sigma to reproduce this for a normal distribution. For a Cauchy distribution, the mean absolute error is
   undefined. Therefore when dist='cauchy', we pick a Cauchy distribution with the same interquartile range. In July 2020,
-  this has the effect of making the per-state probabilities agree worse with predictit, but I think this is reasonable.
+  this has the effect of making the per-state probabilities agree worse with predictit on "safe" states, but I think this is reasonable.
 
-  For k, setting it to more than ~1 unit means disagreeing significantly with experts, who seem to be expecting reversion
+  For k, setting it to more than ~1 unit means disagreeing significantly with experts, who in July 2020 seem to be expecting reversion
   to the mean of states' past behavior.
 
   The rho values I'm using are correlations are state A with state B. I want mine to be state with national, but that should be about the same.
@@ -131,7 +131,7 @@ def main():
   as big as we would get from the rho values. This is the reason for including the fudge factor s and setting it to
   about 2. The effect of making s>1 can counterintuitively be to make the underdog less likely to win. The reason for this is
   is that (1) that variability doesn't help them much, because the underdog needs big correlated change, not uncorrelated change;
-  and (2) the model counts some states as safe, but in the limit as s->infty whoever has more safe electoral votes has the higher
+  and (2) the model counts some states as safe, so in the limit as s->infty whoever has more safe electoral votes has the higher
   probability of winning.
   '''
   a = 9.0 # see above for how this should go down over time
@@ -187,7 +187,7 @@ def main():
 
   print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist)
   if dist=='cauchy':
-    print("Note: Since dist is Cauchy, which has fat tails probabilities for safe states are less extreme. This is intentional.")
+    print("Note: Since dist is Cauchy, which has fat tails, probabilities for safe states are less extreme. This is intentional.")
   predictit_mean = statistics.mean(list(predictit_prob.values()))
   prob_mean = statistics.mean(list(prob.values()))
   print("mean(simulation)-mean(predictit)=",f2(prob_mean-predictit_mean),"; if predictit data are current, this can be used to adjust the parameter k")
@@ -210,7 +210,7 @@ def bell_curve(dist):
 
 def cauchy():
   """
-  Generate a Cauchy random variable with center 1 and the same interquartile range as a standard normal curve.
+  Generate a Cauchy random variable with center 0 and the same interquartile range as a standard normal curve.
   Use this rather than a normal curve to get fatter tails and more spice.
   https://math.stackexchange.com/questions/484395/how-to-generate-a-cauchy-random-variable
   https://en.wikipedia.org/wiki/Cauchy_distribution
