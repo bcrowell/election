@@ -2,6 +2,19 @@ import math,random,statistics,sys,csv
 
 def main():
 
+  '''
+  Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, s, and dist.
+  See README for how to decide on these values.
+  '''
+  a = 9.0 # see above for how this should go down over time
+  k = 0.5 # see above
+  s = 2.0 # see above
+  dist = 'cauchy' # can be cauchy or normal
+  # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
+  rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
+  rho2 = 0.5 # florida
+  rho3 = 0.25 # nevada
+
   electoral_votes = {}
   lean = {}
   predictit_prob = {}
@@ -50,21 +63,8 @@ def main():
   poll_sd = statistics.stdev(swing_poll_list)
   lean_sd = statistics.stdev(swing_lean_list)
 
-  '''
-  Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, s, and dist.
-  See README for how to decide on these values.
-  '''
-  a = 9.0 # see above for how this should go down over time
-  k = 0.5 # see above
-  s = 2.0 # see above
-  dist = 'cauchy' # can be cauchy or normal
-  # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
-  rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
-  rho2 = 0.5 # florida
-  rho3 = 0.25 # nevada
   # calibration of "lean" data to give % units
   c = poll_sd/lean_sd
-
   aa = math.sqrt(math.pi/2.0)*a # Convert mean absolute value to std dev, assuming normal, even if normal isn't what we're actually using.
                                 # See notes on how choice of distribution function affects A.
 

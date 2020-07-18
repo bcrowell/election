@@ -6,9 +6,25 @@ estimates probabilities. It can be used to estimate conditional or joint probabi
 such as the probability that Trump wins the presidential election while losing in
 Pennsylvania.
 
+Output
+======
+The main output is a summary of the adjustable parameters followed by
+a predicted probability for the D candidate to win.
 
-Sources of data
-===============
+Here are some lines from the state-by-state portion of a real run:
+
+               predictit   sim   polls     RCL
+    in   -4.0      0.15    0.25   -11.5    0.09
+    mt   -4.0      0.18    0.25   -9.3    0.11
+
+Four of these columns are just a recap of inputs from data.csv.
+The "sim" column shows the probability from the simulation that
+this state will go democratic. The RCL column gives the probability
+that the R candidate will will the election, conditioned on the hypothesis
+that he loses this state.
+
+Data file and sources of data
+=============================
 
 Per-state data are in the file data.csv.
 
