@@ -51,7 +51,7 @@ def main():
   lean_sd = statistics.stdev(swing_lean_list)
 
   '''
-  Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, d, and dist.
+  Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, s, and dist.
   See README for how to decide on these values.
   '''
   a = 9.0 # see above for how this should go down over time

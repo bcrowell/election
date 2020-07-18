@@ -10,6 +10,8 @@ Pennsylvania.
 Sources of data
 ===============
 
+Per-state data are in the file data.csv.
+
 electoral votes
 ---------------
 
@@ -20,7 +22,9 @@ lean
 
 Semi-quantitative rankings of how much each state leans toward one party or another.
 Positive = democratic.
+
 2020 jul 15, http://insideelections.com/ratings/president
+
 I added half-unit tweaks in cases where these expert opinions didn't seem consistent with polls and predictit.
 In addition to these per-state tweaks, all values have the parameter k added to them later.
 
@@ -36,18 +40,20 @@ poll
 
 Polling advantage for democrats, 2020 jul 16, fivethirtyeight.com.
 Used for two purposes: (1) used automatically to normalize the c parameter;
-(2) helps me to decide on lean_tweaks[].
+(2) helps me to decide on small tweaks to lean[].
 
 adjustable parameters
----------------------
+=====================
 
-The main parameters that it makes sense to fiddle with are A, k, d, and dist.
+The main parameters that it makes sense to fiddle with are A, k, s, and dist.
 
 A = mean absolute error of popular-vote shift between now and election day
 
 k = offset to lean[] values; setting this to a positive value means I don't believe experts who are saying election is close
 
 s = a fudge factor for variability of state votes, see below
+
+dist = 'normal' or 'cauchy', controls what probability distribution is used for random fluctuations
 
 Parameters A and c are in units of percentage points. An overall normalization doesn't affect who wins, but
 does affect predictions of vote share, and getting it right makes it easier to think about whether numbers are reasonable.
