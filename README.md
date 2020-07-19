@@ -64,6 +64,16 @@ this state will go democratic. The RCL column gives the probability
 that the R candidate will win the election, conditioned on the hypothesis
 that he loses this state.
 
+Running the program
+===================
+On MacOS or Linux, open a terminal windows and type `python3 election.py` to run the
+program with the default parameters. The parameters are described below. The most
+important ones are A and the choice of a distribution. As an example where you change
+these parameters from their default values, you could do `python3 election.py a:3 dist:normal`.
+
+To run the program on Windows, the process should be similar, but you'll have to install
+Python first.
+
 Data file and sources of data
 =============================
 
@@ -152,7 +162,7 @@ this has the effect of making the per-state probabilities agree worse with predi
 For k, setting it to more than ~1 unit means disagreeing significantly with experts, who in July 2020 seem to be expecting reversion
 to the mean of states' past behavior.
 
-The rho values I'm using are correlations are state A with state B. I want mine to be state with national, but that should be about the same.
+The rho values I'm using are correlations of state A with state B. I want mine to be state with national, but that should be about the same.
 However, if I just take the per-state variation to be what would mathematically reproduce these rho values, then
 the per-state variation only turns out to contribute about half the variance. This is too small, since state polling
 generally has about twice the error of national polling, and therefore we want per-state variation to be about twice
