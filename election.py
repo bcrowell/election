@@ -21,31 +21,15 @@ def parameters():
 
   n_trials = 10000
 
-  pars = {'a':a,'k':k,'s':s,'dist':dist,'rho':(rho1,rho2,rho3),'n_trials':n_trials}
-
-  for par in sys.argv[1:]:
-    capture = re.search("(.*)=(.*)",par)
-    if capture:
-      p,v = capture.group(1,2)
-      if p in pars:
-        if p=='dist':
-          pars[p] = v
-        else:
-          if p=='n_trials':
-            pars[p] = int(v)
-          else:
-            pars[p] = float(v)
-      else:
-        die("illegal parameter")
-    else:
-      die("syntax error in parameter")
+  pars = {'a':a,'k':k,'s':s,'dist':dist,'rho':(rho1,rho2,rho3),'n_trials':n_trials,'joint':('','')}
+  pars = get_command_line_pars(pars) # override defaults
 
   return pars
 
 def main():
 
   pars = parameters()
-  (a,k,s,dist,rho,n_trials) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'])
+  (a,k,s,dist,rho,n_trials,joint) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'])
   (rho1,rho2,rho3) = rho
 
   sd = state_data()
@@ -71,6 +55,7 @@ def main():
   for state in electoral_votes:
     state_d_wins[state] = 0
     rcl[state] = 0
+  joint_table = [[0,0],[0,0]]
   for i in range(n_trials):
     t = do_one_trial({'safe_d':safe_d,'safe_r':safe_r,'aa':aa,'k':k,'s':s,'dist':dist,'tot':tot,'c':c,
                  'ind':ind,'electoral_votes':electoral_votes,'lean':lean})
@@ -79,6 +64,13 @@ def main():
       state_d_wins[state] += t['state_d_win'][state]
       if t['state_d_win'][state]==1 and t['d_win']==0:
         rcl[state] += 1
+    joint_events = [0,0] 
+    for i in range(2):
+      if joint[i]!='' and joint[i]!='nat':
+        joint_events[i] = t['state_d_win'][joint[i]]
+      else:
+        joint_events[i] = t['d_win']
+    joint_table[joint_events[0]][joint_events[1]] += 1
   prob = {}
   for state in states:
     prob[state] = state_d_wins[state]/n_trials
@@ -90,15 +82,15 @@ def main():
 
   d_prob = d_wins/n_trials
 
-  output({'a':a,'k':k,'s':s,'dist':dist,'n_trials':n_trials},
-         {'d_prob':d_prob,'prob':prob,'rcl':rcl},
+  output(pars,
+         {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table},
          {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
             'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states}
         )
 
 def output(pars,results,sd):
-  (a,k,s,dist,n_trials) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'])
-  (d_prob,prob,rcl) = (results['d_prob'],results['prob'],results['rcl'])
+  (a,k,s,dist,n_trials,joint) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'],pars['joint'])
+  (d_prob,prob,rcl,joint_table) = (results['d_prob'],results['prob'],results['rcl'],results['joint_table'])
   (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states) = (sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
             sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'])
 
@@ -114,6 +106,17 @@ def output(pars,results,sd):
   print("           predictit   sim   polls     RCL")
   for state in states:
     print(state," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state]))
+
+  if joint[0]!='':
+    print("joint probabilities:")
+    for i in range(2):
+      for j in range(2):
+        joint_table[i][j] *= 1.0/n_trials
+    print("            D in ",joint[1])
+    print("            lose     win")
+    for i in range(2):
+      print("  lose ",joint[0],f2(joint_table[i][0])," ",f2(joint_table[i][1]))
+        
 
 def do_one_trial(dat):
   (safe_d,safe_r,aa,k,s,dist,tot,c,ind,electoral_votes,lean) = (dat['safe_d'],dat['safe_r'],
@@ -136,6 +139,7 @@ def do_one_trial(dat):
     t['d_win'] = 1
   else:
     t['d_win'] = 0
+  t['vote'] = x
   return t
 
 def calibrate_lean_to_percent(poll,lean):
@@ -231,5 +235,28 @@ def f2(x):
   else:
     return ("%5.2f") % x
 
+def get_command_line_pars(pars):
+  for par in sys.argv[1:]:
+    capture = re.search("(.*)=(.*)",par)
+    if capture:
+      p,v = capture.group(1,2)
+      if p in pars:
+        if p=='dist': # strings
+          pars[p] = v
+        else:
+          if p=='n_trials':
+            pars[p] = int(v)
+          else:
+            if p=='joint':
+              capture = re.search("(.*),(.*)",v)
+              j1,j2 = capture.group(1,2)
+              pars['joint'] = (j1,j2)
+            else:
+              pars[p] = float(v)
+      else:
+        die("illegal parameter")
+    else:
+      die("syntax error in parameter")
+  return pars
 
 main()

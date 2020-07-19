@@ -74,6 +74,12 @@ these parameters from their default values, you could do `python3 election.py a=
 To run the program on Windows, the process should be similar, but you'll have to install
 Python first.
 
+Tables of joint probabilities
+=============================
+To see a table of joint probabilities for two states, do something like
+`election.py joint=pa,wi`. To use the national result in place of one of
+the states, do, e.g., `election.py joint=pa,nat`.
+
 Data file and sources of data
 =============================
 
