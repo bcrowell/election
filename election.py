@@ -1,10 +1,13 @@
-import math,random,statistics,sys,csv
+#!/bin/python3
+
+import math,random,statistics,sys,csv,re
 
 def parameters():
   '''
   Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, s, and dist.
   See README for how to decide on these values.
-  Fixme: Defaults should be read from a data file, and should be able to be overridden from the command line.
+  The defaults below can be overridden from the command line, e.g., election.py a=10.
+  Fixme: Defaults should be read from a data file.
   '''
   a = 4.5 # 9.0 # see above for how this should go down over time
   k = 0.5 # see above
@@ -18,7 +21,26 @@ def parameters():
 
   n_trials = 10000
 
-  return {'a':a,'k':k,'s':s,'dist':dist,'rho':(rho1,rho2,rho3),'n_trials':n_trials}
+  pars = {'a':a,'k':k,'s':s,'dist':dist,'rho':(rho1,rho2,rho3),'n_trials':n_trials}
+
+  for par in sys.argv[1:]:
+    capture = re.search("(.*)=(.*)",par)
+    if capture:
+      p,v = capture.group(1,2)
+      if p in pars:
+        if p=='dist':
+          pars[p] = v
+        else:
+          if p=='n_trials':
+            pars[p] = int(v)
+          else:
+            pars[p] = float(v)
+      else:
+        die("illegal parameter")
+    else:
+      die("syntax error in parameter")
+
+  return pars
 
 def main():
 
