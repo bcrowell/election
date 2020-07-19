@@ -83,29 +83,30 @@ def main():
   d_prob = d_wins/n_trials
 
   output(pars,
-         {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table},
+         {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table,'aa':aa},
          {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
-            'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states}
+            'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind}
         )
 
 def output(pars,results,sd):
   (a,k,s,dist,n_trials,joint) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'],pars['joint'])
-  (d_prob,prob,rcl,joint_table) = (results['d_prob'],results['prob'],results['rcl'],results['joint_table'])
-  (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states) = (sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
-            sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'])
+  (d_prob,prob,rcl,joint_table,aa) = (results['d_prob'],results['prob'],results['rcl'],results['joint_table'],results['aa'])
+  (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states,ind) = (sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
+            sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'],sd['ind'])
 
   print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist)
   if dist=='cauchy':
     print("Note: Since dist is Cauchy, which has fat tails, probabilities for safe states are less extreme. This is intentional.")
+  print("Width of nationally correlated fluctuations = ",f2(aa)," %")
   predictit_mean = statistics.mean(list(predictit_prob.values()))
   prob_mean = statistics.mean(list(prob.values()))
   #print("mean(simulation)-mean(predictit)=",f2(prob_mean-predictit_mean),"; if predictit data are current, this can be used to adjust the parameter k")
   #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
-  print("           predictit   sim   polls     RCL")
+  print("           predictit   sim   polls     RCL  width")
   for state in states:
-    print(state," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state]))
+    print(state," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state])," ",f2(ind[state]))
 
   if joint[0]!='':
     print("joint probabilities:")
@@ -115,7 +116,11 @@ def output(pars,results,sd):
     print("            D in ",joint[1])
     print("            lose     win")
     for i in range(2):
-      print("  lose ",joint[0],f2(joint_table[i][0])," ",f2(joint_table[i][1]))
+      if i==0:
+        descr = "lose"
+      else:
+        descr = " win"
+      print(" ",descr,"",joint[0],f2(joint_table[i][0])," ",f2(joint_table[i][1]))
         
 
 def do_one_trial(dat):
@@ -181,8 +186,8 @@ def state_data():
   states.sort(key=lambda s:predictit_prob[s])
 
   # Safe states are those that don't occur in the data file.
-  safe_d =  68 # includes 3 electoral votes from maine
-  safe_r = 113 # includes 1 electoral vote from maine
+  safe_d =  68 # includes 3 electoral votes from maine, but not ME-02
+  safe_r = 111 # includes 4 electoral votes from nebraska, but not NE-02
 
   # Check that the total number of electoral votes is what it should be. This value doesn't change when there's a census, because
   # it's capped by statute at this value: https://en.wikipedia.org/wiki/United_States_congressional_apportionment
