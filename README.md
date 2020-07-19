@@ -69,7 +69,7 @@ Running the program
 On MacOS or Linux, open a terminal windows and type `python3 election.py` to run the
 program with the default parameters. The parameters are described below. The most
 important ones are A and the choice of a distribution. As an example where you change
-these parameters from their default values, you could do `python3 election.py a:3 dist:normal`.
+these parameters from their default values, you could do `python3 election.py a=3 dist=normal`.
 
 To run the program on Windows, the process should be similar, but you'll have to install
 Python first.
