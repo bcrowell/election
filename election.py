@@ -104,16 +104,16 @@ def output(pars,results,sd):
   #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
-  print("           predictit   sim   polls     RCL  width")
+  print("              predictit   sim   polls     RCL    width")
   for state in states:
-    print(state," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state])," ",f2(ind[state]))
+    print(ps(state)," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state])," ",f2(ind[state]))
 
   if joint[0]!='':
     print("joint probabilities:")
     for i in range(2):
       for j in range(2):
         joint_table[i][j] *= 1.0/n_trials
-    print("            D in ",joint[1])
+    print("            D in ",ps(joint[1]))
     print("            lose     win")
     for i in range(2):
       if i==0:
@@ -239,6 +239,16 @@ def f2(x):
     return "-----"
   else:
     return ("%5.2f") % x
+
+def ps(state):
+  # Convert stuff like "fl" to "FL".
+  if state=='m2':
+    return "ME-02"
+  if state=='n2':
+    return "NE-02"
+  if state=="nat":
+    return state
+  return state.upper()+"   "
 
 def get_command_line_pars(pars):
   for par in sys.argv[1:]:
