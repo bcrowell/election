@@ -9,8 +9,8 @@ def parameters():
   The defaults below can be overridden from the command line, e.g., election.py a=10.
   Fixme: Defaults should be read from a data file.
   '''
-  a = 4.5 # 9.0 # see above for how this should go down over time
-  k = 0.5 # see above
+  a = 9.0 # see docs for how this should go down over time
+  k = 0.0 # see above
   s = 2.0 # see above
   dist = 'cauchy' # can be cauchy or normal
 
@@ -109,7 +109,7 @@ def output(pars,results,sd):
   #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
-  print("             lean      predictit  sim       polls  sim     width       RCL")
+  print("             lean      predictit  sim       polls  sim   width         RCL")
   for state in states:
     print(ps(state),"      ",f1(lean[state]),"     ",f2(predictit_prob[state])," ",f2(prob[state]),"    ",
          f1(poll[state])," ",f1(vote_avg[state])," ",f2(ind[state]),"    ",f2(rcl[state])
