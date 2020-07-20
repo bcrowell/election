@@ -2,37 +2,38 @@
 
 import math,random,statistics,sys,csv,re
 
-def parameters():
+def parameters(filename):
   '''
   Set adjustable parameters. The main parameters that it makes sense to fiddle with are A, k, s, and dist.
   See README for how to decide on these values.
-  The defaults below can be overridden from the command line, e.g., election.py a=10.
-  Fixme: Defaults should be read from a data file.
+  The defaults can be overridden from the command line, e.g., election.py a=10.
   '''
-  a = 9.0 # see docs for how this should go down over time
-  k = 0.0 # see above
-  s = 2.0 # see above
-  dist = 'cauchy' # can be cauchy or normal
+
+  pars = get_defaults_from_file(filename)
+
+  missing = set(pars.keys())-set(parameter_names())
+  if not set_is_empty(missing):
+    die("missing parameters: "+repr(missing))
 
   # correlations among states, see https://projects.economist.com/us-2020-forecast/president/how-this-works
   rho1 = 0.75 # northeastern swing states, i.e., all but NV and FL
   rho2 = 0.5 # florida
   rho3 = 0.25 # nevada
 
-  n_trials = 10000
+  pars['rho'] = (rho1,rho2,rho3)
+  pars['joint'] = ('','')
 
-  pars = {'a':a,'k':k,'s':s,'dist':dist,'rho':(rho1,rho2,rho3),'n_trials':n_trials,'joint':('','')}
   pars = get_command_line_pars(pars) # override defaults
 
   return pars
 
 def main():
 
-  pars = parameters()
+  pars = parameters('defaults.txt')
   (a,k,s,dist,rho,n_trials,joint) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'])
   (rho1,rho2,rho3) = rho
 
-  sd = state_data()
+  sd = state_data('data.csv')
   (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states) = (sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
             sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'])
 
@@ -170,12 +171,12 @@ def calibrate_lean_to_percent(poll,lean):
   c = poll_sd/lean_sd
   return c
 
-def state_data():
+def state_data(filename):
   electoral_votes = {}
   lean = {}
   predictit_prob = {}
   poll = {}
-  with open('data.csv', newline='') as csv_file:
+  with open(filename, newline='') as csv_file:
     csv_reader = csv.reader(csv_file)
     titles = True
     for row in csv_reader:
@@ -281,28 +282,45 @@ def ps(state):
     return state
   return state.upper()+"   "
 
-def get_command_line_pars(pars):
-  for par in sys.argv[1:]:
-    capture = re.search("(.*)=(.*)",par)
-    if capture:
-      p,v = capture.group(1,2)
-      if p in pars:
-        if p=='dist': # strings
-          pars[p] = v
-        else:
-          if p=='n_trials':
-            pars[p] = int(v)
-          else:
-            if p=='joint':
-              capture = re.search("(.*),(.*)",v)
-              j1,j2 = capture.group(1,2)
-              pars['joint'] = (j1,j2)
-            else:
-              pars[p] = float(v)
-      else:
-        die("illegal parameter "+str(p))
-    else:
-      die("syntax error in parameter")
+def get_defaults_from_file(file):
+  pars = {}
+  with open(file, newline='') as par_file:
+    for line in par_file:
+      pars = get_one_par(pars,line)
   return pars
+
+def get_command_line_pars(pars):
+  for arg in sys.argv[1:]:
+    pars = get_one_par(pars,arg)
+  return pars
+
+def get_one_par(pars,par):
+  capture = re.search("(.*)=(.*)",par)
+  if capture:
+    p,v = capture.group(1,2)
+    if p in parameter_names():
+      if p=='dist': # strings
+        pars[p] = v
+      else:
+        if p=='n_trials':
+          pars[p] = int(v)
+        else:
+          if p=='joint':
+            capture = re.search("(.*),(.*)",v)
+            j1,j2 = capture.group(1,2)
+            pars['joint'] = (j1,j2)
+          else:
+            pars[p] = float(v)
+    else:
+      die("illegal parameter "+str(p))
+  else:
+    die("syntax error in parameter")
+  return pars
+
+def parameter_names():
+  return ['a','k','s','dist','n_trials','joint','rho']
+
+def set_is_empty(s):
+  return s == set()
 
 main()

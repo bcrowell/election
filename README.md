@@ -148,16 +148,13 @@ adjustable parameters
 
 The main parameters that it makes sense to fiddle with are A, k, s, and dist.
 
-A = mean absolute error of popular-vote shift between now and election day
+A = mean absolute error of popular-vote shift between now and election day, in percentage points
 
 k = offset to lean[] values; setting this to a positive value favors D candidate, means I don't believe experts who are saying the 2020 election is close
 
 s = a fudge factor for variability of state votes, see below
 
 dist = 'normal' or 'cauchy', controls what probability distribution is used for random fluctuations
-
-Parameters A and c are in units of percentage points. An overall normalization doesn't affect who wins, but
-does affect predictions of vote share, and getting it right makes it easier to think about whether numbers are reasonable.
 
 What are a priori reasonable values of A and k?
 
@@ -173,11 +170,17 @@ https://fivethirtyeight.com/features/how-accurate-have-state-polls-been/
 This is about double the error for national polls. That partly means that states are really more variable, and
 partly that state polling isn't as good or intensive.
 
-For national popular-vote polls, twelve months out, the average absolute error is about 12%, 4 months out is 9%,
-and in the final month 2.5%.
+For the last 6 elections (1996-2016), the errors have not shown much of a trend over time for the year leading up
+to the election.
+The absolute error in these elections tended to sit at about 5% for the whole year, and then maybe dip down to about 3% only for
+the final month or two. It's unclear to me whether elections have really gotten more preditable since the 1990's or
+whether it's just a coincidence that the last 6 elections all behaved this way.
+
+https://www.thecrosstab.com/2017/01/03/history-polling-error-us-uk/
+
 https://politics.stackexchange.com/questions/54680/historical-data-on-how-the-reliability-of-polling-data-depends-on-time-remaining
 
-So reasonable estimates for A, which measures national vote uncertainty, are: July 9%, November 2.5%.
+So reasonable estimates for A, which measures national vote uncertainty, are: July 6%, November 4%.
 
 All of the above assumes a normal distribution, but I doubt that real political fluctuations have tails as skinny as
 those of a normal distribution. Epidemics and volcanoes happen, etc. I currently have dist=cauchy rather than normal.
