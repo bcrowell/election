@@ -54,13 +54,25 @@ a predicted probability for the D candidate to win.
 
 After this is some state-by-state data. Here are the first few lines of a run:
 
-               predictit   sim   polls     RCL
-    in   -4.0      0.15    0.25   -11.5    0.09
-    mt   -4.0      0.18    0.25   -9.3    0.11
+                  predictit   sim   polls     sim    width    RCL
+    IN      -4.5      0.15    0.16   -11.5   -10.8    4.44    0.05
+    MT      -3.0      0.18    0.23   -9.3   -6.5    4.44    0.06
+    TX      -2.0      0.37    0.31   -0.3   -4.1    4.44    0.02
+    ME-02   -1.0      0.42    0.43    3.0   -1.2    4.44    0.06
 
 Four of these columns are just a recap of inputs from data.csv.
-The "sim" column shows the probability from the simulation that
-this state will go democratic. The RCL column gives the probability
+The first numerical column is the semi-quantitative "lean" rating for
+which way the state leans.
+
+The next two columns are the probability for D to win based on predictit
+and based on the simulation.
+
+The next three columns are the real polling data, mean election-day voting
+data from the simulation, and the width of the bell curve being used to
+simulate this state's uncorrelated uncertainty (in addition to the nationwide,
+correlated uncertainty controlled by A).
+
+The RCL column gives the probability
 that the R candidate will win the election, conditioned on the hypothesis
 that he loses this state.
 
