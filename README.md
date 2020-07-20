@@ -111,13 +111,22 @@ lean
 ----
 
 Semi-quantitative rankings of how much each state leans toward one party or another.
-Positive = democratic.
+Positive = democratic. These are based on the following three sets of ratings by experts:
 
-2020 jul 15, http://insideelections.com/ratings/president
+http://insideelections.com/ratings/president
 
-I added half-unit tweaks in cases where these expert opinions didn't seem consistent with polls and predictit.
-In addition to these per-state tweaks, all values have the parameter k added to them later. I also made up
-values like +5 and -6 for states that insideelections simply describes as safe; these were cooked up in
+http://crystalball.centerforpolitics.org/crystalball/2020-president/
+
+https://cookpolitical.com/
+
+The final three columns of the spreadsheet are date-stamped compilations of these three
+sets of ratings. These columns are not actually used by the program. They're there to make
+it easier for me to evaluate and update the "lean" column, which is actually used.
+
+The normalization of the "lean" column is chosen to be similar to the normalization of the
+insideelections.com ratings.
+All of these values have the parameter k added to them later. I also made up
+values like +5 and -6 for states that experts simply describe as safe; these were cooked up in
 order to get rough agreement with predictit.
 
 predictit_prob
