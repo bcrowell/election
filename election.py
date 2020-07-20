@@ -140,13 +140,7 @@ def do_one_trial(dat):
   t = {}
   t['state_d_win'] = {}
   for state, v in electoral_votes.items():
-    xx = pop+ind[state]*bell_curve(dist)+c*(lean[state]+k)
-    # for the main simulation, all we care about is the sign of X, but for vote counts we need it to be a possible, realistic value
-    if xx<-100.0:
-      xx= -100.0
-    if xx>100.0:
-      xx = 100.0
-    x[state] = xx
+    x[state] = bell_to_200_percent_range(pop+ind[state]*bell_curve(dist)+c*(lean[state]+k))
     if x[state]>0.0:
       d = d+v
       t['state_d_win'][state] = 1
@@ -234,6 +228,30 @@ def cauchy():
   y = random.random()
   scale = 1.34896/2.0 # interquartile range of standard normal is 1.35..., of Cauchy(0,1) is 2
   return scale*math.tan(math.pi*(y-0.5))
+
+def bell_to_200_percent_range(x):
+  """
+  Input x is a random variable meant to represent a margin of victory in an election, in %, but sampled from
+  a bell curve with tails that cover the whole real line. This isn't actually logically right, because you
+  can't win by more than 100% or lose by less than 100%. Therefore, put x through a nonlinear transformation
+  that brings it into the range of possibile values. The choice of a nonlinear function is somewhat arbitrary,
+  but has to satisfy the criterion (1) that f(0)=0, so that it doesn't affect the actual outcome of
+  a state primary. I would also like it to have property (2) that for a toss-up state, it doesn't change the
+  input much, i.e., f'(0)=1. I chose an arctan because if the distribution of x is derived from a Cauchy distribution,
+  then it's possible for the resulting distribution to be uniform. (tan(x) is Cauchy if x is uniform on -pi/2 to pi/2.)
+  This means that we can get distributions for f that don't go to zero at +-100%, and I think that makes sense, e.g.,
+  it is logically possible for the U.S. to become a fascist dictatorship and have 100% of votes go to the dictator
+  in a fake plebiscite.
+  """
+  if True:
+    n = 100.0/(math.pi/2)
+    return n*math.atan(x/n)
+  else:
+    if x<-100.0:
+      return -100.0
+    if x>100.0:
+      return 100.0
+    return x
 
 def normal():
   return random.normalvariate(0,1)
