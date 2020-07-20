@@ -52,9 +52,11 @@ def main():
   d_wins = 0
   state_d_wins = {}
   rcl = {} # republican win conditioned on losing this state
+  vote_avg = {}
   for state in electoral_votes:
     state_d_wins[state] = 0
     rcl[state] = 0
+    vote_avg[state] = 0
   joint_table = [[0,0],[0,0]]
   for i in range(n_trials):
     t = do_one_trial({'safe_d':safe_d,'safe_r':safe_r,'aa':aa,'k':k,'s':s,'dist':dist,'tot':tot,'c':c,
@@ -71,6 +73,8 @@ def main():
       else:
         joint_events[i] = t['d_win']
     joint_table[joint_events[0]][joint_events[1]] += 1
+    for state in states:
+      vote_avg[state] += t['vote'][state]/n_trials
   prob = {}
   for state in states:
     prob[state] = state_d_wins[state]/n_trials
@@ -85,14 +89,15 @@ def main():
   output(pars,
          {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table,'aa':aa},
          {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
-            'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind}
+            'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind,'vote_avg':vote_avg}
         )
 
 def output(pars,results,sd):
   (a,k,s,dist,n_trials,joint) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'],pars['joint'])
   (d_prob,prob,rcl,joint_table,aa) = (results['d_prob'],results['prob'],results['rcl'],results['joint_table'],results['aa'])
-  (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states,ind) = (sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
-            sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'],sd['ind'])
+  (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states,ind,vote_avg) = (
+            sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
+            sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'],sd['ind'],sd['vote_avg'])
 
   print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist)
   if dist=='cauchy':
@@ -104,23 +109,25 @@ def output(pars,results,sd):
   #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
-  print("              predictit   sim   polls     RCL    width")
+  print("              predictit   sim   polls     sim    width    RCL")
   for state in states:
-    print(ps(state)," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",f1(poll[state])," ",f2(rcl[state])," ",f2(ind[state]))
+    print(ps(state)," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",
+         f1(poll[state])," ",f1(vote_avg[state])," ",f2(ind[state])," ",f2(rcl[state])
+    )
 
   if joint[0]!='':
     print("joint probabilities:")
     for i in range(2):
       for j in range(2):
         joint_table[i][j] *= 1.0/n_trials
-    print("            D in ",ps(joint[1]))
-    print("            lose     win")
+    print("               D in ",ps(joint[1]))
+    print("               lose     win")
     for i in range(2):
       if i==0:
         descr = "lose"
       else:
         descr = " win"
-      print(" ",descr,"",joint[0],f2(joint_table[i][0])," ",f2(joint_table[i][1]))
+      print(" ",descr,"",ps(joint[0]),f2(joint_table[i][0])," ",f2(joint_table[i][1]))
         
 
 def do_one_trial(dat):
@@ -133,7 +140,13 @@ def do_one_trial(dat):
   t = {}
   t['state_d_win'] = {}
   for state, v in electoral_votes.items():
-    x[state] = pop+ind[state]*bell_curve(dist)+c*(lean[state]+k)
+    xx = pop+ind[state]*bell_curve(dist)+c*(lean[state]+k)
+    # for the main simulation, all we care about is the sign of X, but for vote counts we need it to be a possible, realistic value
+    if xx<-100.0:
+      xx= -100.0
+    if xx>100.0:
+      xx = 100.0
+    x[state] = xx
     if x[state]>0.0:
       d = d+v
       t['state_d_win'][state] = 1
@@ -269,7 +282,7 @@ def get_command_line_pars(pars):
             else:
               pars[p] = float(v)
       else:
-        die("illegal parameter")
+        die("illegal parameter "+str(p))
     else:
       die("syntax error in parameter")
   return pars
