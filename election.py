@@ -109,10 +109,10 @@ def output(pars,results,sd):
   #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
-  print("              predictit   sim   polls     sim    width    RCL")
+  print("             lean      predictit  sim       polls  sim     width       RCL")
   for state in states:
-    print(ps(state)," ",f1(lean[state]),"   ",f2(predictit_prob[state])," ",f2(prob[state])," ",
-         f1(poll[state])," ",f1(vote_avg[state])," ",f2(ind[state])," ",f2(rcl[state])
+    print(ps(state),"      ",f1(lean[state]),"     ",f2(predictit_prob[state])," ",f2(prob[state]),"    ",
+         f1(poll[state])," ",f1(vote_avg[state])," ",f2(ind[state]),"    ",f2(rcl[state])
     )
 
   if joint[0]!='':
@@ -194,7 +194,7 @@ def state_data():
 
   # Safe states are those that don't occur in the data file.
   safe_d =  68 # includes 3 electoral votes from maine, but not ME-02
-  safe_r = 111 # includes 4 electoral votes from nebraska, but not NE-02
+  safe_r =  93 # includes 4 electoral votes from nebraska, but not NE-02
 
   # Check that the total number of electoral votes is what it should be. This value doesn't change when there's a census, because
   # it's capped by statute at this value: https://en.wikipedia.org/wiki/United_States_congressional_apportionment
