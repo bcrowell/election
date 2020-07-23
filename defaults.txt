@@ -1,4 +1,4 @@
-a=6.0
+a=7.0
 k=0.0
 s=2.0
 dist=cauchy

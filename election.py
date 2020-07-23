@@ -110,7 +110,7 @@ def output(pars,results,sd):
   #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
-  print("             lean      predictit  sim       polls  sim   width         RCL")
+  print("             lean       predictit  sim       polls  sim    width         RCL")
   for state in states:
     print(ps(state),"      ",f1(lean[state]),"     ",f2(predictit_prob[state])," ",f2(prob[state]),"    ",
          f1(poll[state])," ",f1(vote_avg[state])," ",f2(ind[state]),"    ",f2(rcl[state])
@@ -264,7 +264,7 @@ def f1(x):
   if x is None:
     return "----"
   else:
-    return ("%4.1f") % x
+    return ("%5.1f") % x
 
 def f2(x):
   if x is None:
