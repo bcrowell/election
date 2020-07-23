@@ -86,9 +86,10 @@ def main():
                                                      # even conditioned on happened
     else:
       rcl[state] = None
+  print("probabilities of electoral college margins:")
   for b in range(n_predictit_bins()):
     r = predictit_bin_to_margin_range(b)
-    print("  ",r[0],"to",r[1],", hist=",f2(electoral_college_histogram[b]/n_trials))
+    print("  ",r[0],"to",r[1],", ",f2(electoral_college_histogram[b]/n_trials))
 
   d_prob = d_wins/n_trials
 
@@ -287,15 +288,21 @@ def predictit_bins():
   return [0, 10, 30, 60, 100, 150, 210, 280] # special casing for 0
 
 def predictit_bin_to_margin_range(b):
+  r = raw_predictit_bin_to_margin_range(b)
+  if r[0]==0:
+    return(1,r[1])
+  return r
+
+def raw_predictit_bin_to_margin_range(b):
   if b<0 or b>n_predictit_bins()-1:
     print("error, illegal b=",b," in predictit_bin_to_margin_range")
     die('')
   if b<n_predictit_bins()/2:
-    result = predictit_bin_to_margin_range(n_predictit_bins()-b-1)
-    return (-result[0],-result[1])    
+    result = raw_predictit_bin_to_margin_range(n_predictit_bins()-b-1)
+    return (-result[1],-result[0])
   k = int(b-n_predictit_bins()/2)
   if k+1<len(predictit_bins()):
-    hi=predictit_bins()[k+1]
+    hi=predictit_bins()[k+1]-1
   else:
     hi=electoral_college_size()
   return (predictit_bins()[k],hi)
@@ -310,11 +317,11 @@ def vote_margin_to_predictit_bin(x):
     return (0,-(bins[1]-1),0) # 0 is counted the same as a win for R in 2020
   if x<0:
     a = vote_margin_to_predictit_bin(-x)
-    return (1-a[0],-a[1],-a[2])
+    return (n_predictit_bins()-a[0]-1,-a[1],-a[2])
   for i in range(len(bins)-1):
     if x>=bins[i] and x<bins[i+1]:
-      return (i+1,bins[i],bins[i+1]-1)
-  return (len(bins),bins[len(bins)-1],electoral_college_size())
+      return (int(n_predictit_bins()/2)+i,bins[i],bins[i+1]-1)
+  return (n_predictit_bins()-1,bins[len(bins)-1],electoral_college_size())
 
 def n_predictit_bins():
   return 16
