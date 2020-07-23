@@ -59,10 +59,12 @@ def main():
     rcl[state] = 0
     vote_avg[state] = 0
   joint_table = [[0,0],[0,0]]
+  electoral_college_histogram = [0] * n_predictit_bins()
   for i in range(n_trials):
     t = do_one_trial({'safe_d':safe_d,'safe_r':safe_r,'aa':aa,'k':k,'s':s,'dist':dist,'tot':tot,'c':c,
                  'ind':ind,'electoral_votes':electoral_votes,'lean':lean})
     d_wins += t['d_win']
+    electoral_college_histogram[t['bin']] += 1
     for state in states:
       state_d_wins[state] += t['state_d_win'][state]
       if t['state_d_win'][state]==1 and t['d_win']==0:
@@ -84,13 +86,17 @@ def main():
                                                      # even conditioned on happened
     else:
       rcl[state] = None
+  for b in range(n_predictit_bins()):
+    r = predictit_bin_to_margin_range(b)
+    print("  ",r[0],"to",r[1],", hist=",f2(electoral_college_histogram[b]/n_trials))
 
   d_prob = d_wins/n_trials
 
   output(pars,
          {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table,'aa':aa},
          {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
-            'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind,'vote_avg':vote_avg}
+            'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind,'vote_avg':vote_avg,
+            'electoral_college_histogram':electoral_college_histogram}
         )
 
 def output(pars,results,sd):
@@ -153,6 +159,7 @@ def do_one_trial(dat):
   else:
     t['d_win'] = 0
   t['vote'] = x
+  t['bin'] = vote_margin_to_predictit_bin(2*d-electoral_college_size())[0]
   return t
 
 def calibrate_lean_to_percent(poll,lean):
@@ -197,16 +204,20 @@ def state_data(filename):
   safe_d =  68 # includes 3 electoral votes from maine, but not ME-02
   safe_r =  93 # includes 4 electoral votes from nebraska, but not NE-02
 
-  # Check that the total number of electoral votes is what it should be. This value doesn't change when there's a census, because
-  # it's capped by statute at this value: https://en.wikipedia.org/wiki/United_States_congressional_apportionment
+  # Check that the total number of electoral votes is what it should be. 
   tot = safe_d + safe_r
   for state, v in electoral_votes.items():
     tot = tot+v
-  if tot!=538:
-    die("tot does not equal 538")
+  if tot!=electoral_college_size():
+    die("tot does not equal correct size for electoral college")
 
   return {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
             'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states}
+
+# This value doesn't change when there's a census, because
+# it's capped by statute at this value: https://en.wikipedia.org/wiki/United_States_congressional_apportionment
+def electoral_college_size():
+  return 538
 
 def correlation_to_weight(rho):
   return math.sqrt(rho**-0.5-1)
@@ -271,6 +282,42 @@ def f2(x):
     return "-----"
   else:
     return ("%5.2f") % x
+
+def predictit_bins():
+  return [0, 10, 30, 60, 100, 150, 210, 280] # special casing for 0
+
+def predictit_bin_to_margin_range(b):
+  if b<0 or b>n_predictit_bins()-1:
+    print("error, illegal b=",b," in predictit_bin_to_margin_range")
+    die('')
+  if b<n_predictit_bins()/2:
+    result = predictit_bin_to_margin_range(n_predictit_bins()-b-1)
+    return (-result[0],-result[1])    
+  k = int(b-n_predictit_bins()/2)
+  if k+1<len(predictit_bins()):
+    hi=predictit_bins()[k+1]
+  else:
+    hi=electoral_college_size()
+  return (predictit_bins()[k],hi)
+
+def vote_margin_to_predictit_bin(x):
+  """
+  returns (bin number,low,high)
+  bin numbers for R go from 0 to neg values, for D from 1 to higher pos values
+  """
+  bins = predictit_bins()
+  if x==0:
+    return (0,-(bins[1]-1),0) # 0 is counted the same as a win for R in 2020
+  if x<0:
+    a = vote_margin_to_predictit_bin(-x)
+    return (1-a[0],-a[1],-a[2])
+  for i in range(len(bins)-1):
+    if x>=bins[i] and x<bins[i+1]:
+      return (i+1,bins[i],bins[i+1]-1)
+  return (len(bins),bins[len(bins)-1],electoral_college_size())
+
+def n_predictit_bins():
+  return 16
 
 def ps(state):
   # Convert stuff like "fl" to "FL".
