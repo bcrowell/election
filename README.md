@@ -76,6 +76,9 @@ The RCL column gives the probability
 that the R candidate will win the election, conditioned on the hypothesis
 that he loses this state.
 
+A histogram probabilities of various electoral college results is printed
+to the file histogram.txt.
+
 Running the program
 ===================
 On MacOS or Linux, open a terminal windows and type `python3 election.py` to run the

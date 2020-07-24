@@ -86,19 +86,23 @@ def main():
                                                      # even conditioned on happened
     else:
       rcl[state] = None
-  print("probabilities of electoral college margins:")
-  for b in range(n_predictit_bins()):
-    r = predictit_bin_to_margin_range(b)
-    print("  ",r[0],"to",r[1],", ",f2(electoral_college_histogram[b]/n_trials))
 
   d_prob = d_wins/n_trials
-
   output(pars,
          {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table,'aa':aa},
          {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
             'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind,'vote_avg':vote_avg,
             'electoral_college_histogram':electoral_college_histogram}
         )
+  write_electoral_college_histogram('histogram.txt',electoral_college_histogram,n_trials)
+
+
+def write_electoral_college_histogram(filename,electoral_college_histogram,n_trials):
+  with open(filename,'w') as f:
+    print("probabilities of electoral college margins:",file=f)
+    for b in range(n_predictit_bins()):
+      r = predictit_bin_to_margin_range(b)
+      print("  ",r[0],"to",r[1],", ",f2(electoral_college_histogram[b]/n_trials),file=f)
 
 def output(pars,results,sd):
   (a,k,s,dist,n_trials,joint) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'],pars['joint'])
