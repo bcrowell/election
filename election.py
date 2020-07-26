@@ -105,7 +105,7 @@ def write_electoral_college_histogram(filename,electoral_college_histogram,n_tri
       print("  ",r[0],"to",r[1],", ",f2(electoral_college_histogram[b]/n_trials),file=f)
 
 def output(pars,results,sd):
-  (a,k,s,dist,n_trials,joint) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'],pars['joint'])
+  (a,k,s,dist,n_trials,joint,swing) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'],pars['joint'],pars['swing'])
   (d_prob,prob,rcl,joint_table,aa) = (results['d_prob'],results['prob'],results['rcl'],results['joint_table'],results['aa'])
   (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states,ind,vote_avg) = (
             sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
@@ -114,6 +114,8 @@ def output(pars,results,sd):
   print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist)
   if dist=='cauchy':
     print("Note: Since dist is Cauchy, which has fat tails, probabilities for safe states are less extreme. This is intentional.")
+  if swing==1:
+    print("Because swing=1, some states are omitted from the listing.")
   print("Width of nationally correlated fluctuations = ",f2(aa)," %")
   predictit_mean = statistics.mean(list(predictit_prob.values()))
   prob_mean = statistics.mean(list(prob.values()))
@@ -123,8 +125,9 @@ def output(pars,results,sd):
   print("prob of D win=",d_prob)
   print("             lean       predictit  sim       polls  sim    width         RCL")
   for state in states:
-    print(ps(state),"      ",f1(lean[state]),"     ",f2(predictit_prob[state])," ",f2(prob[state]),"    ",
-         f1(poll[state])," ",f1(vote_avg[state])," ",f2(ind[state]),"    ",f2(rcl[state])
+    if swing==0 or (predictit_prob[state]>0.20 and predictit_prob[state]<0.80):
+      print(ps(state),"      ",f1(lean[state]),"     ",f2(predictit_prob[state])," ",f2(prob[state]),"    ",
+           f1(poll[state])," ",f1(vote_avg[state])," ",f2(ind[state]),"    ",f2(rcl[state])
     )
 
   if joint[0]!='':
@@ -344,15 +347,16 @@ def get_defaults_from_file(file):
   pars = {}
   with open(file, newline='') as par_file:
     for line in par_file:
-      pars = get_one_par(pars,line)
+      if re.search(r"[^\s]",line):
+        pars = get_one_par(pars,line,f"reading defaults from file {file}")
   return pars
 
 def get_command_line_pars(pars):
   for arg in sys.argv[1:]:
-    pars = get_one_par(pars,arg)
+    pars = get_one_par(pars,arg,"reading command-line parameters")
   return pars
 
-def get_one_par(pars,par):
+def get_one_par(pars,par,context_for_errors):
   capture = re.search("(.*)=(.*)",par)
   if capture:
     p,v = capture.group(1,2)
@@ -360,7 +364,7 @@ def get_one_par(pars,par):
       if p=='dist': # strings
         pars[p] = v
       else:
-        if p=='n_trials':
+        if p=='n_trials' or p=='swing':
           pars[p] = int(v)
         else:
           if p=='joint':
@@ -370,13 +374,13 @@ def get_one_par(pars,par):
           else:
             pars[p] = float(v)
     else:
-      die("illegal parameter "+str(p))
+      die("illegal parameter "+str(p)+context_for_errors)
   else:
-    die("syntax error in parameter")
+    die(f"syntax error in parameter: '{par}', {context_for_errors}")
   return pars
 
 def parameter_names():
-  return ['a','k','s','dist','n_trials','joint','rho']
+  return ['a','k','s','dist','n_trials','joint','rho','swing']
 
 def set_is_empty(s):
   return s == set()
