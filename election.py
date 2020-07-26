@@ -185,7 +185,6 @@ def calibrate_lean_to_percent(poll,lean):
 
   # calibration of "lean" data to give % units
   c = poll_sd/lean_sd
-  print("c=",c) # qwe
   return c
 
 def state_data(filename):
@@ -249,7 +248,7 @@ def cauchy():
   """
   y = random.random()
   scale = 1.34896/2.0 # interquartile range of standard normal is 1.35..., of Cauchy(0,1) is 2
-  return scale*math.tan(math.pi*(y-0.5))
+  return scale*math.tan(math.pi*(y-0.5)) # this is different from the atan(...) applied elsewhere
 
 def bell_to_200_percent_range(x):
   """
