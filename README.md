@@ -16,14 +16,23 @@ The model helps me confirm my hunch that one or the other of these
 opinions has to be wrong. I can adjust the amount of randomness in the
 model to reproduce one of these numbers, but not both at the same time.
 
-The model is not useful for predicting the popular vote (its expectation
-value or its probability distribution). It doesn't even have data on
+The model is not useful for predicting the popular vote. It doesn't even have data on
 all the states --- small solid-red states are all lumped together, as are
 small solid-blue states.
 
 If you just want to see the model's current predictions without having
 to get the code running on your own machine, go to
 [this page](https://github.com/bcrowell/election/blob/master/current_results.txt).
+
+Another amateur who has done this sort of thing is University of Alabama
+student  [Jack Kersting](https://projects.jhkforecasts.com/presidential-forecast/forecast_methodology).
+
+design goals
+============
+
+ * Make a tool that does one thing and does it well.
+ * Make the simplest possible model that has any hope of doing anything reasonable.
+ * Make a model that has almost no ad hoc rules and whose parameters can be estimated reliably using real-world data.
 
 How the model works
 ===================
