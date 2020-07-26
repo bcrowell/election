@@ -46,15 +46,8 @@ width A, and this is added onto every state's estimated margin.
 
 In addition, every state gets its own random number added on, using the same type of
 bell curve but with width B_i for the ith state. The widths B_i are not set
-by the user but are instead cooked up based on 
-[some data I found](https://projects.economist.com/us-2020-forecast/president/how-this-works)
-about correlations between various swing states. Basically most of the swing states are
-in the north, and are more highly correlated, but NV and FL have a lower correlation.
-Therefore these states are special-cased.
-The sizes of the B_i are set by first taking them to be the sizes that would give
-the historically observed correlations, and then scaled up by a user-controlled factor s.
-The default is s=2, which is meant to take into account the fact that state polls are
-often rather unreliable compared to national polls.
+by the user but are instead cooked up using a method described below in the
+section titled "How per-state variability is set."
 
 The result for a particular state depends on whether the sum described above is positive (goes democratic)
 or negative (republican). The state's electoral votes are counted, and the result of the election
@@ -237,6 +230,18 @@ If swing=1 (the default), then states are only shown if they are real swing stat
 Set swing=0 to see all states that are in the model.
 
 If tie=-1 (the default), then a tie in the electoral college goes to the republicans, who control a majority of state delegations in the house.
+
+How per-state variability is set
+================================
+The parameters B_i are cooked up based on 
+[some data I found](https://projects.economist.com/us-2020-forecast/president/how-this-works)
+about correlations between vote totals in various swing states. Basically most of the swing states are
+in the north, and are more highly correlated, but NV and FL have a lower correlation.
+Therefore those two states are special-cased.
+The sizes of the B_i are set by first taking them to be the sizes that would give
+the historically observed correlations (0.75), and then scaled up by a user-controlled factor s.
+The default is s=2, which is meant to take into account the fact that state polls are
+often rather unreliable compared to national polls.
 
 Details about the bell curves
 =============================
