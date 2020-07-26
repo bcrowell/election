@@ -51,33 +51,34 @@ section titled "How per-state variability is set."
 
 The result for a particular state depends on whether the sum described above is positive (goes democratic)
 or negative (republican). The state's electoral votes are counted, and the result of the election
-is determined for that particular election.
+is determined for that particular run.
 
 By default, the bell curve used to generate these numbers is sampled
 from a probability distribution called a Cauchy distribution, which
 has fatter tails than a normal (Gaussian) curve, allowing for a higher
-probability of "black swan" or "perfect storm" events. If you want to
-use a normal curve instead, you can select this (see below). The units
+probability of "black swan" or "perfect storm" events. If the Cauchy is too spicy for your taste,
+you can select the normal curve instead. The units
 of the A and B_i variables should basically be interpreted as mean
 absolute errors, but for those who care about mathematical details,
 see the section below titled "Details about the bell curves."
 
-Not all states are simulated. Small states that are solid red or blue are
+Not all states are included in the simulation. Small states that are solid red or blue are
 simply counted as safe electoral votes. This is mainly because there is
 often no polling data for such states.
 
 Output
 ======
-The main output is a summary of the adjustable parameters followed by
+The main output is a recap of the adjustable parameters followed by
 a predicted probability for the D candidate to win.
 
-After this is some state-by-state data. Here are the first few lines of a run:
+After this is some state-by-state data, which by default is restricted only
+to a short list of swing states (a shorter list than even the list that the
+code considers non-safe). Here are the first few lines of a run:
 
-                  predictit   sim   polls     sim    width    RCL
-    IN      -4.5      0.15    0.16   -11.5   -10.8    4.44    0.05
-    MT      -3.0      0.18    0.23   -9.3   -6.5    4.44    0.06
-    TX      -2.0      0.37    0.31   -0.3   -4.1    4.44    0.02
-    ME-02   -1.0      0.42    0.43    3.0   -1.2    4.44    0.06
+                 lean       predictit  sim       polls  sim    width         RCL
+    AK            -1.0        0.25    0.41       -2.0    -2.8    6.90       0.07
+    TX            -1.0        0.37    0.40       -0.1    -2.4    6.90       0.03
+    ME-02          0.0        0.42    0.50        3.0     0.2    6.90       0.07
 
 Four of these columns are just a recap of inputs from data.csv.
 The first numerical column is the semi-quantitative "lean" rating for
