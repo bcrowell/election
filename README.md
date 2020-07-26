@@ -204,3 +204,10 @@ about 2. The effect of making s>1 can counterintuitively be to make the underdog
 is that (1) that variability doesn't help them much, because the underdog needs big correlated change, not uncorrelated change;
 and (2) the model counts some states as safe, so in the limit as s->infty whoever has more safe electoral votes has the higher
 probability of winning.
+
+other arguments
+===============
+If swing=1 (the default), then states are only shown if they are real swing states (probability on predictit between 0.2-0.8).
+Set swing=0 to see all states that are in the model.
+
+If tie=-1 (the default), then a tie in the electoral college goes to the republicans, who control a majority of state delegations in the house.

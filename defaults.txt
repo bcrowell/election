@@ -4,4 +4,6 @@ s=2.0
 dist=cauchy
 n_trials=10000
 swing=1
+tie=-1
+
 

@@ -30,7 +30,7 @@ def parameters(filename):
 def main():
 
   pars = parameters('defaults.txt')
-  (a,k,s,dist,rho,n_trials,joint) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'])
+  (a,k,s,dist,rho,n_trials,joint,tie) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'],pars['tie'])
   (rho1,rho2,rho3) = rho
 
   sd = state_data('data.csv')
@@ -62,7 +62,7 @@ def main():
   electoral_college_histogram = [0] * n_predictit_bins()
   for i in range(n_trials):
     t = do_one_trial({'safe_d':safe_d,'safe_r':safe_r,'aa':aa,'k':k,'s':s,'dist':dist,'tot':tot,'c':c,
-                 'ind':ind,'electoral_votes':electoral_votes,'lean':lean})
+                 'ind':ind,'electoral_votes':electoral_votes,'lean':lean,'tie':tie})
     d_wins += t['d_win']
     electoral_college_histogram[t['bin']] += 1
     for state in states:
@@ -146,9 +146,9 @@ def output(pars,results,sd):
         
 
 def do_one_trial(dat):
-  (safe_d,safe_r,aa,k,s,dist,tot,c,ind,electoral_votes,lean) = (dat['safe_d'],dat['safe_r'],
+  (safe_d,safe_r,aa,k,s,dist,tot,c,ind,electoral_votes,lean,tie) = (dat['safe_d'],dat['safe_r'],
               dat['aa'],dat['k'],dat['s'],dat['dist'],dat['tot'],dat['c'],
-              dat['ind'],dat['electoral_votes'],dat['lean'])
+              dat['ind'],dat['electoral_votes'],dat['lean'],dat['tie'])
   d = safe_d
   pop = aa*bell_curve(dist)
   x = {}
@@ -161,7 +161,8 @@ def do_one_trial(dat):
       t['state_d_win'][state] = 1
     else:
       t['state_d_win'][state] = 0
-  if d>tot*0.5:
+  tie = (d*2==tot)
+  if d>tot*0.5 or (tie and dat['tie']==1):
     # fixme: handle the case of a tie in the electoral college
     t['d_win'] = 1
   else:
@@ -364,7 +365,7 @@ def get_one_par(pars,par,context_for_errors):
       if p=='dist': # strings
         pars[p] = v
       else:
-        if p=='n_trials' or p=='swing':
+        if p=='n_trials' or p=='swing' or p=='tie':
           pars[p] = int(v)
         else:
           if p=='joint':
@@ -380,7 +381,7 @@ def get_one_par(pars,par,context_for_errors):
   return pars
 
 def parameter_names():
-  return ['a','k','s','dist','n_trials','joint','rho','swing']
+  return ['a','k','s','dist','n_trials','joint','rho','swing','tie']
 
 def set_is_empty(s):
   return s == set()
