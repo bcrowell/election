@@ -24,28 +24,54 @@ small solid-blue states.
 How the model works
 ===================
 
-Each state has a "lean" value, usually originating from insideelections.com. Zero means
-a toss-up, positive values mean it leans D. For convenience, these are multiplied by a factor to get
-them in the same % units as polling results. The result is a currently estimated margin for the democrats.
-(These could also have just been taken directly from polling, but I decided to put more emphasis on
-experts' opinions.)
+Each state has a "lean" value L, based on the consensus of several experts (Cook, insideelections, and Sabato). L=0 means
+a toss-up, L>0 is favorable to the democrats. For example, a state that leans slightly to the democrats would
+have L=+1, while a reasonably safe republican state like Montana is -2. These values are multiplied by a factor
+that is automatically calculated so that for swing states, the standard deviation of the L values is the same
+as the standard deviation of the polling results. For example, in July of 2020, this scaling factor comes out
+to be 3.0, meaning that if a state has L=+1, the democratic candidate is expected to win by 3 points.
+These could also have just been taken directly from polling, but I decided to put more emphasis on
+experts' opinions. In July 2020, these expert opinions seem to predict that a lot of states will behave
+more according to their partisan voting index than indicated by current polls, i.e.,they are expecting
+a regression toward historical behavior between now and the election.
 
-The simulation is run n times. Each time, a single random number is
-generated from a bell-shaped distribution (normal or Cauchy) with
-width A, and this is added onto every state's estimated margin. In
-addition, every state gets its own random number added on. All these
-random numbers represent both polling error and the fact that things
+The election is run n times in a Monte Carlo simulation, with some randomness thrown in on top of each state's
+expected margin. This randomness accounts for
+both polling error and the fact that things
 can happen between now and election day, e.g., a war or an epidemic.
-The parameter A should be reduced as we get closer to election day;
-see below.
 
-Florida and Nevada have more individual randomness than the other swing states, as suggested
-by some data I found online showing them to be not as strongly correlated with
-the other swing states, which are mostly in the northeast.
+For each run, a single random number is
+generated from a bell-shaped distribution with
+width A, and this is added onto every state's estimated margin.
+
+In addition, every state gets its own random number added on, using the same type of
+bell curve but with width B_i for the ith state. The widths B_i are not set
+by the user but are instead cooked up based on 
+[some data I found](https://projects.economist.com/us-2020-forecast/president/how-this-works)
+about correlations between various swing states. Basically most of the swing states are
+in the north, and are more highly correlated, but NV and FL have a lower correlation.
+Therefore these states are special-cased.
+The sizes of the B_i are set by first taking them to be the sizes that would give
+the historically observed correlations, and then scaled up by a user-controlled factor s.
+The default is s=2, which is meant to take into account the fact that state polls are
+often rather unreliable compared to national polls.
 
 The result for a particular state depends on whether the sum described above is positive (goes democratic)
 or negative (republican). The state's electoral votes are counted, and the result of the election
 is determined for that particular election.
+
+By default, the bell curve used to generate these numbers is sampled
+from a probability distribution called a Cauchy distribution, which
+has fatter tails than a normal (Gaussian) curve, allowing for a higher
+probability of "black swan" or "perfect storm" events. If you want to
+use a normal curve instead, you can select this (see below). The units
+of the A and B_i variables should basically be interpreted as mean
+absolute errors, but for those who care about mathematical details,
+see the section below titled "Details about the bell curves."
+
+Not all states are simulated. Small states that are solid red or blue are
+simply counted as safe electoral votes. This is mainly because there is
+often no polling data for such states.
 
 Output
 ======
@@ -211,3 +237,30 @@ If swing=1 (the default), then states are only shown if they are real swing stat
 Set swing=0 to see all states that are in the model.
 
 If tie=-1 (the default), then a tie in the electoral college goes to the republicans, who control a majority of state delegations in the house.
+
+Details about the bell curves
+=============================
+The A and B_i numbers describe the width of a bell curve according to a specific
+definition. If the distribution is normal, then A is defined as the mean absolute value (which is
+how pollsters report error) rather than the standard deviation.
+
+If the distribution is
+Cauchy, then the bell curve that is used is the one that has the same inter-quartile range
+as the corresponding normal curve. The results of the simulation are mainly sensitive to
+the behavior of swing states, but some large solid-red or solid-blue states are included
+as well, and when the Cauchy distribution is used, this sometimes leads to logically
+impossible outcomes in which one candidate beats the other by more than 100%. The simulation
+actually only cares who wins, not by how much (and it isn't designed to predict the popular
+vote reliably), but to handle this in a consistent way, all simulated vote margins
+(whether simulated using normal or Cauchy) are passed through the function
+y=N*atan(x/N), where N=200/pi. Because x is normally pretty small, this seldom changes
+things very much, e.g., a 5% margin changes to 4.99%.
+
+As an intellectual/mathematical curiosity, this method, when used with
+the Cauchy distribution, can result in a finite (but realistically
+very small) probability for |y|=100. (To see this, note that a Cauchy
+random variable can be generated by taking the rangent of a uniform
+variable.) I think that actually makes sense, e.g., it is logically
+possible (but very likely) for the U.S. to become a fascist
+dictatorship and have 100% of votes go to the dictator in a fake
+plebiscite.

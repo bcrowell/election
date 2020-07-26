@@ -185,6 +185,7 @@ def calibrate_lean_to_percent(poll,lean):
 
   # calibration of "lean" data to give % units
   c = poll_sd/lean_sd
+  print("c=",c) # qwe
   return c
 
 def state_data(filename):
