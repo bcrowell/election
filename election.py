@@ -362,18 +362,14 @@ def get_one_par(pars,par,context_for_errors):
   if capture:
     p,v = capture.group(1,2)
     if p in parameter_names():
-      if p=='dist': # strings
-        pars[p] = v
+      if p=='rho':
+        die("Setting the rho parameters can only be done by editing the source code.")
+      if p=='joint':
+        capture = re.search("(.*),(.*)",v)
+        j1,j2 = capture.group(1,2)
+        pars['joint'] = (j1,j2)
       else:
-        if p=='n_trials' or p=='swing' or p=='tie':
-          pars[p] = int(v)
-        else:
-          if p=='joint':
-            capture = re.search("(.*),(.*)",v)
-            j1,j2 = capture.group(1,2)
-            pars['joint'] = (j1,j2)
-          else:
-            pars[p] = float(v)
+        pars[p] = parameter_types()[p](v)
     else:
       die("illegal parameter "+str(p)+context_for_errors)
   else:
@@ -381,7 +377,15 @@ def get_one_par(pars,par,context_for_errors):
   return pars
 
 def parameter_names():
-  return ['a','k','s','dist','n_trials','joint','rho','swing','tie']
+  return list(parameter_types().keys())
+
+def parameter_types():
+  f = lambda x:float(x)
+  i = lambda x:int(x)
+  s = lambda x:x # string
+  b = i # boolean, treated as int
+  t = s # tuple, requires some postprocessing
+  return {'a':f,'k':f,'s':f,'dist':s,'n_trials':i,'joint':t,'rho':None,'swing':b,'tie':i}
 
 def set_is_empty(s):
   return s == set()
