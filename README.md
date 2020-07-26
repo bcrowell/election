@@ -21,6 +21,10 @@ value or its probability distribution). It doesn't even have data on
 all the states --- small solid-red states are all lumped together, as are
 small solid-blue states.
 
+If you just want to see the model's current predictions without having
+to get the code running on your own machine, go to
+[this page](https://github.com/bcrowell/election/blob/master/current_results.txt).
+
 How the model works
 ===================
 
