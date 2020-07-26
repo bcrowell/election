@@ -1,0 +1,20 @@
+A=   7.0 , k=   0.0 , s=   2.0 , dist= cauchy
+Note: Since dist is Cauchy, which has fat tails, probabilities for safe states are less extreme. This is intentional.
+Because swing=1, some states are omitted from the listing.
+Width of nationally correlated fluctuations =   8.77  %
+prob of D win= 0.7233
+             lean       predictit  sim       polls  sim    width         RCL
+AK            -1.0        0.25    0.41       -2.0    -2.7    6.90       0.07
+TX            -1.0        0.37    0.41       -0.1    -2.5    6.90       0.03
+ME-02          0.0        0.42    0.50        3.0    -0.2    6.90       0.08
+IA            -1.0        0.43    0.42       -0.7    -2.4    6.90       0.07
+OH             1.0        0.45    0.59        1.8     2.8    6.90       0.07
+GA             0.0        0.46    0.51        0.9     0.1    6.90       0.05
+NC             0.0        0.58    0.51        2.9    -0.1    6.90       0.06
+FL             1.5        0.63    0.60        7.5     3.5   11.29       0.08
+AZ             0.0        0.64    0.50        2.6    -0.3    6.90       0.06
+WI             1.0        0.72    0.58        6.6     2.5    6.90       0.08
+NE-02          2.0        0.74    0.67        7.0     5.2    6.90       0.11
+MI             2.0        0.75    0.67        7.6     5.1    6.90       0.09
+PA             2.0        0.76    0.67        7.5     5.1    6.90       0.09
+NH             2.0        0.77    0.66        8.0     5.3    6.90       0.11
