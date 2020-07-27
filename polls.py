@@ -2,14 +2,16 @@
 
 # parse a csv file in the format supplied by https://projects.fivethirtyeight.com/polls-page/president_polls.csv
 
-import math,sys,csv,re,copy
+import math,sys,csv,re,copy,datetime,statistics
 
 def main():
+  now = datetime.datetime.now()
   filename = 'president_polls.csv'
   candidates = ("biden","trump")
   i_state = 0
   i_answer = 5
   i_pct = 6
+  i_pollster = 7
   with open(filename, newline='') as csv_file:
     csv_reader = csv.reader(csv_file)
     titles = True
@@ -28,7 +30,7 @@ def main():
         continue
       if (not re.search(r"\d",date)) or (not re.search(r"\w",answer)) or (not re.search(r"\d",pct)):
         continue
-      if (not re.search(r"\w",partisan)): # this is blank for polls from the primaries
+      if re.search(r"\w",partisan): # this is blank for polls from the primaries
         continue
       if (not re.search(r"[AB]",grade)) or re.search(r"(C|B\-)",grade): # reject b/c, b-, or anything that doesn't have a or b in it
         continue
@@ -71,8 +73,21 @@ def main():
         if not (state in by_state):
           by_state[state] = []
         by_state[state].append({'raw':d1,'date':date,'pct':pct})
-
-
+      else:
+        print(d1)
+    states = list(by_state.keys())
+    states.sort()
+    for state in states:
+      results = []
+      for poll in by_state[state]: # dict with keys raw, date, pct
+        #print(state,poll['date'],poll['pct'],poll['raw'][i_pollster])
+        age = (now-datetime.datetime.strptime(poll['date'], '%m/%d/%y')).days
+        if age<60:
+          results.append(poll['pct'])
+      if len(results)==0:
+        continue
+      print("state=",state,", avg=",f1(statistics.mean(results)))
+          
 
 
 
@@ -146,8 +161,15 @@ def state_to_abbrev(name):
     'Wisconsin': 'WI',
     'Wyoming': 'WY',
     'Nebraska CD-2': 'NE-02',
+    'Maine CD-1': 'ME-01',
     'Maine CD-2': 'ME-02'
   }[name]
+
+def f1(x):
+  if x is None:
+    return "----"
+  else:
+    return ("%5.1f") % x
 
 main()
 
