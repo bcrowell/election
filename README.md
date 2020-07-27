@@ -133,7 +133,7 @@ the states, do, e.g., `election.py joint=pa,nat`.
 Data file and sources of data
 =============================
 
-Per-state data are in the file data.csv. States that don't appear in the file are
+Per-state data are in the files data.csv and polls.csv. States that don't appear in data.csv are
 considered totally safe for one party, and are accounted for in the variables
 safe_d and safe_r in the code. If putting a state in or taking one out, these
 two variables need to be adjusted, or an error will result because the code detects
@@ -174,12 +174,18 @@ Probability that democrats win the state according to
 predictit, 2020 jul 15.
 Not used in calculations, only in output, to help me adjust parameters.
 
-poll
-----
+polls
+-----
 
-Polling advantage for democrats, 2020 jul 16, fivethirtyeight.com.
+The file polls.csv lists the polling advantage for democrats.
 Used for two purposes: (1) used automatically to normalize the c parameter;
 (2) helps me to decide on small tweaks to lean[].
+
+The file polls.csv is constructed by first taking the csv file supplied by https://projects.fivethirtyeight.com/polls-page/president_polls.csv
+and then throwing away any polls unless they meet the following criteria:
+(1) the poll is not listed as a partisan poll; (2) the pollster has a grade of at least B (not B- or B/C);
+and (3) the poll is less than 60 days old. Polls that satisfy these criteria are all weighted equally.
+These criteria are designed to eliminate certain pollsters like Spry that fivethirtyeight's rules allow in.
 
 adjustable parameters
 =====================

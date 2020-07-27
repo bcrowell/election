@@ -33,7 +33,7 @@ def main():
   (a,k,s,dist,rho,n_trials,joint,tie) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'],pars['tie'])
   (rho1,rho2,rho3) = rho
 
-  sd = state_data('data.csv')
+  sd = state_data('data.csv','polls.csv')
   (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states) = (sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
             sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'])
 
@@ -178,7 +178,8 @@ def calibrate_lean_to_percent(poll,lean):
   swing_poll_list = []
   swing_lean_list = []
   for state in poll:
-    if abs(lean[state])<4: # Don't count states with huge lean values, not real swing states, because those values aren't carefully calibrated.
+    if abs(lean[state])<4 and state in poll and not (poll[state] is None):
+      # Don't count states with huge lean values, not real swing states, because those values aren't carefully calibrated.
       swing_poll_list.append(poll[state])
       swing_lean_list.append(lean[state])
   poll_sd = statistics.stdev(swing_poll_list)
@@ -188,7 +189,7 @@ def calibrate_lean_to_percent(poll,lean):
   c = poll_sd/lean_sd
   return c
 
-def state_data(filename):
+def state_data(filename,polls_file):
   electoral_votes = {}
   lean = {}
   predictit_prob = {}
@@ -204,7 +205,17 @@ def state_data(filename):
       electoral_votes[state] = int(row[1])
       lean[state] = float(row[2])
       predictit_prob[state] = float(row[3])
-      poll[state] = float(row[4])
+      poll[state] = None
+  with open(polls_file, newline='') as csv_file:
+    csv_reader = csv.reader(csv_file)
+    titles = True
+    for row in csv_reader:
+      if titles:
+        titles = False
+        continue
+      state = row[0]
+      if state in lean:
+        poll[state] = float(row[1])
 
   # list of states, sorted in order by probability on predictit
   states = list(electoral_votes.keys())

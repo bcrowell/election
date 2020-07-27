@@ -1,18 +1,20 @@
 #!/bin/python3
 
 # parse a csv file in the format supplied by https://projects.fivethirtyeight.com/polls-page/president_polls.csv
+# output a CSV file consisting only of polls within the last 60 days that fivethirtyeight rates at least B and that are not partisan
 
 import math,sys,csv,re,copy,datetime,statistics
 
 def main():
   now = datetime.datetime.now()
-  filename = 'president_polls.csv'
+  infile = 'president_polls.csv'
+  outfile = 'polls.csv'
   candidates = ("biden","trump")
   i_state = 0
   i_answer = 5
   i_pct = 6
   i_pollster = 7
-  with open(filename, newline='') as csv_file:
+  with open(infile, newline='') as csv_file:
     csv_reader = csv.reader(csv_file)
     titles = True
     raw_rows = []
@@ -77,19 +79,27 @@ def main():
         print(d1)
     states = list(by_state.keys())
     states.sort()
-    for state in states:
-      results = []
-      for poll in by_state[state]: # dict with keys raw, date, pct
-        #print(state,poll['date'],poll['pct'],poll['raw'][i_pollster])
-        age = (now-datetime.datetime.strptime(poll['date'], '%m/%d/%y')).days
-        if age<60:
-          results.append(poll['pct'])
-      if len(results)==0:
-        continue
-      print("state=",state,", avg=",f1(statistics.mean(results)))
-          
-
-
+    with open(outfile,'w') as f:
+      for state in states:
+        results = []
+        pollsters = [] # only take the first poll by a given pollster on a given date
+        details = ''
+        for poll in by_state[state]: # dict with keys raw, date, pct
+          age = (now-datetime.datetime.strptime(poll['date'], '%m/%d/%y')).days
+          pkey = poll['raw'][i_pollster]+","+poll['date']
+          if pkey in pollsters:
+            continue # only take the first poll by a given pollster on a given date
+          pollsters.append(pkey)
+          if age<60:
+            details = details + f"    {poll['date']} {poll['pct']} {poll['raw'][i_pollster]}\n"
+            results.append(poll['pct'])
+        if len(results)==0:
+          continue
+        avg = statistics.mean(results)
+        print("state=",state,", avg=",f1(avg))
+        print(details)
+        f.write(f'{state.lower()},{f1(avg)}\n')
+  print(f"Output written to {outfile}")
 
 def unpack_row(row,col_map,keys):
   result = []
