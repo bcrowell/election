@@ -88,10 +88,10 @@ After this is some state-by-state data, which by default is restricted only
 to a short list of swing states (a shorter list than even the list that the
 code considers non-safe). Here are the first few lines of a run:
 
-                 lean       predictit  sim       polls  sim    width         RCL
-    AK            -1.0        0.25    0.41       -2.0    -2.8    6.90       0.07
-    TX            -1.0        0.37    0.40       -0.1    -2.4    6.90       0.03
-    ME-02          0.0        0.42    0.50        3.0     0.2    6.90       0.07
+                 lean       predictit  sim       polls  sim      HIQR        RCL
+    AK            -1.0        0.25    0.40       -2.0    -3.1    4.65       0.07
+    TX            -1.0        0.37    0.40       -0.1    -3.1    4.65       0.03
+    ME-02          0.0        0.42    0.50        3.0     0.1    4.65       0.08
 
 Four of these columns are just a recap of inputs from data.csv.
 The first numerical column is the L rating for
@@ -101,9 +101,11 @@ The next two columns are the probability for D to win based on predictit
 and based on the simulation.
 
 The next three columns are the real polling data, mean election-day voting
-data from the simulation, and the width of the bell curve being used to
+data from the simulation, and a measure of the width of the bell curve being used to
 simulate this state's uncorrelated uncertainty (in addition to the nationwide,
-correlated uncertainty controlled by A).
+correlated uncertainty controlled by A). The width is described using half the
+inter-quartile range (HIQR), e.g., if the HIQR is 4%, then there's a 50% chance
+that the result will lie within the +-4% range.
 
 The RCL column gives the probability
 that the R candidate will win the election, conditioned on the hypothesis
@@ -245,6 +247,10 @@ Set swing=0 to see all states that are in the model.
 
 If tie=-1 (the default), then a tie in the electoral college goes to the republicans, who control a majority of state delegations in the house.
 In the unlikely event that this ever changes, set tie=1 in defaults.txt.
+The tie is settled by a vote of state delegations in the house, using the newly elected congress. If a state
+delegation deadlocks, it sits out that round of voting.
+[Analysis](http://centerforpolitics.org/crystalball/articles/republican-edge-in-electoral-college-tie-endures/).
+
 
 How per-state variability is set
 ================================

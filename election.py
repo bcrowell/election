@@ -116,18 +116,19 @@ def output(pars,results,sd):
     print("Note: Since dist is Cauchy, which has fat tails, probabilities for safe states are less extreme. This is intentional.")
   if swing==1:
     print("Because swing=1, some states are omitted from the listing.")
-  print("Width of nationally correlated fluctuations = ",f2(aa)," %")
+  print("Half inter-quartile range (HIQR) of nationally correlated fluctuations = ",f2(iqr('normal')*aa/2.0)," %")
+  # ... aa is defined such that if dist is normal, it's the std dev, and if dist is cauchy it's the std dev of the normal that has the same IQR
   predictit_mean = statistics.mean(list(predictit_prob.values()))
   prob_mean = statistics.mean(list(prob.values()))
   #print("mean(simulation)-mean(predictit)=",f2(prob_mean-predictit_mean),"; if predictit data are current, this can be used to adjust the parameter k")
   #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
-  print("             lean       predictit  sim       polls  sim    width         RCL")
+  print("             lean       predictit  sim       polls  sim      HIQR        RCL")
   for state in states:
     if swing==0 or (predictit_prob[state]>0.20 and predictit_prob[state]<0.80):
       print(ps(state),"      ",f1(lean[state]),"     ",f2(predictit_prob[state])," ",f2(prob[state]),"    ",
-           f1(poll[state])," ",f1(vote_avg[state])," ",f2(ind[state]),"    ",f2(rcl[state])
+           f1(poll[state])," ",f1(vote_avg[state])," ",f2(iqr('normal')*ind[state]/2.0),"    ",f2(rcl[state])
     )
 
   if joint[0]!='':
@@ -246,9 +247,19 @@ def cauchy():
   https://math.stackexchange.com/questions/484395/how-to-generate-a-cauchy-random-variable
   https://en.wikipedia.org/wiki/Cauchy_distribution
   """
-  y = random.random()
-  scale = 1.34896/2.0 # interquartile range of standard normal is 1.35..., of Cauchy(0,1) is 2
+  y = random.random() # uniform
+  scale = iqr('normal')/iqr('cauchy')
   return scale*math.tan(math.pi*(y-0.5)) # this is different from the atan(...) applied elsewhere
+
+def iqr(dist):
+  """
+  Return the interquartile range of normal(0,1) or Cauchy(0,1),
+  """
+  if dist=='normal':
+    return 1.34896
+  if dist=='cauchy':
+    return 2
+  die(f'in width_to_iqr(), illegal dist={dist}')
 
 def bell_to_200_percent_range(x):
   """
