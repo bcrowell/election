@@ -72,9 +72,10 @@ def main():
       if d1[i_answer]==candidates[0] and d2[i_answer]==candidates[1]:
         state,grade,office,date,partisan,answer,pct,pollster = d1
         pct = float(d1[i_pct])-float(d2[i_pct])
+        undecided = 100.0-(float(d1[i_pct])+float(d2[i_pct]))
         if not (state in by_state):
           by_state[state] = []
-        by_state[state].append({'raw':d1,'date':date,'pct':pct})
+        by_state[state].append({'raw':d1,'date':date,'pct':pct,'undecided':undecided})
       else:
         print(d1)
     states = list(by_state.keys())
@@ -82,6 +83,7 @@ def main():
     with open(outfile,'w') as f:
       for state in states:
         results = []
+        results_undecided = []
         pollsters = [] # only take the first poll by a given pollster on a given date
         details = ''
         for poll in by_state[state]: # dict with keys raw, date, pct
@@ -94,14 +96,16 @@ def main():
             continue # only take the first poll by a given pollster on a given date
           pollsters.append(pkey)
           if age<60:
-            details = details + f"    {poll['date']} {poll['pct']} {poll['raw'][i_pollster]}\n"
+            details = details + f"    {poll['date']} {poll['pct']} undecided={poll['undecided']} {poll['raw'][i_pollster]}\n"
             results.append(poll['pct'])
+            results_undecided.append(poll['undecided'])
         if len(results)==0:
           continue
         avg = statistics.mean(results)
-        print("state=",state,", avg=",f1(avg))
+        und = statistics.mean(results_undecided)
+        print("state=",state,", avg=",f1(avg),", undecided=",f1(und))
         print(details)
-        f.write(f'{state.lower()},{f1(avg)}\n')
+        f.write(f'{state.lower()},{f1(avg)},{f1(und)}\n')
   print(f"Output written to {outfile}")
 
 def unpack_row(row,col_map,keys):

@@ -34,7 +34,8 @@ def main():
   (rho1,rho2,rho3) = rho
 
   sd = state_data('data.csv','polls.csv')
-  (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states) = (sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
+  (electoral_votes,lean,predictit_prob,poll,undecided,safe_d,safe_r,tot,states) = (
+            sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],sd['undecided'],
             sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'])
 
   n = len(electoral_votes) # number of swing states
@@ -90,7 +91,7 @@ def main():
   d_prob = d_wins/n_trials
   output(pars,
          {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table,'aa':aa},
-         {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
+         {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,'undecided':undecided,
             'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind,'vote_avg':vote_avg,
             'electoral_college_histogram':electoral_college_histogram}
         )
@@ -107,8 +108,8 @@ def write_electoral_college_histogram(filename,electoral_college_histogram,n_tri
 def output(pars,results,sd):
   (a,k,s,dist,n_trials,joint,swing) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'],pars['joint'],pars['swing'])
   (d_prob,prob,rcl,joint_table,aa) = (results['d_prob'],results['prob'],results['rcl'],results['joint_table'],results['aa'])
-  (electoral_votes,lean,predictit_prob,poll,safe_d,safe_r,tot,states,ind,vote_avg) = (
-            sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],
+  (electoral_votes,lean,predictit_prob,poll,undecided,safe_d,safe_r,tot,states,ind,vote_avg) = (
+            sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],sd['undecided'],
             sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'],sd['ind'],sd['vote_avg'])
 
   print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist)
@@ -124,11 +125,12 @@ def output(pars,results,sd):
   #...to be useful, this feature should restrict itself to real swing states
 
   print("prob of D win=",d_prob)
-  print("             lean       predictit  sim       polls  sim      HIQR        RCL")
+  print("             lean       predictit  sim       polls    sim      HIQR        RCL")
   for state in states:
     if swing==0 or (predictit_prob[state]>0.20 and predictit_prob[state]<0.80):
+      sym = uncertainty_symbol(poll[state],undecided[state])
       print(ps(state),"      ",f1(lean[state]),"     ",f2(predictit_prob[state])," ",f2(prob[state]),"    ",
-           f1(poll[state])," ",f1(vote_avg[state])," ",f2(iqr('normal')*ind[state]/2.0),"    ",f2(rcl[state])
+           f1(poll[state]),sym," ",f1(vote_avg[state])," ",f2(iqr('normal')*ind[state]/2.0),"    ",f2(rcl[state])
     )
 
   if joint[0]!='':
@@ -194,6 +196,7 @@ def state_data(filename,polls_file):
   lean = {}
   predictit_prob = {}
   poll = {}
+  undecided = {}
   with open(filename, newline='') as csv_file:
     csv_reader = csv.reader(csv_file)
     titles = True
@@ -206,6 +209,7 @@ def state_data(filename,polls_file):
       lean[state] = float(row[2])
       predictit_prob[state] = float(row[3])
       poll[state] = None
+      undecided[state] = None
   with open(polls_file, newline='') as csv_file:
     csv_reader = csv.reader(csv_file)
     titles = True
@@ -216,6 +220,7 @@ def state_data(filename,polls_file):
       state = row[0]
       if state in lean:
         poll[state] = float(row[1])
+        undecided[state] = float(row[2])
 
   # list of states, sorted in order by probability on predictit
   states = list(electoral_votes.keys())
@@ -232,13 +237,31 @@ def state_data(filename,polls_file):
   if tot!=electoral_college_size():
     die("tot does not equal correct size for electoral college")
 
-  return {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,
+  return {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,'undecided':undecided,
             'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states}
 
 # This value doesn't change when there's a census, because
 # it's capped by statute at this value: https://en.wikipedia.org/wiki/United_States_congressional_apportionment
 def electoral_college_size():
   return 538
+
+def uncertainty_symbol(pp,uu):
+  # pp = difference in polls
+  # uu = % undecided
+  if pp is None:
+    return " "
+  p = pp/100.0
+  u =uu/100.0
+  d = 1-u # fraction who have decided
+  x = (d+p)/2.0 # fraction D
+  y = (d-p)/2.0 # fraction R
+  l = min(x,y) # lower share
+  f = (0.5-l)/u # fraction of undecideds that the current loser would in order to win
+  if f>1:
+    return "!" # loser can't win even if all undecideds go to them
+  if f>0.66:
+    return " "
+  return "?"
 
 def correlation_to_weight(rho):
   return math.sqrt(rho**-0.5-1)

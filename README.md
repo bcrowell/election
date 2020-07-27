@@ -88,10 +88,10 @@ After this is some state-by-state data, which by default is restricted only
 to a short list of swing states (a shorter list than even the list that the
 code considers non-safe). Here are the first few lines of a run:
 
-                 lean       predictit  sim       polls  sim      HIQR        RCL
-    AK            -1.0        0.25    0.40       -2.0    -3.1    4.65       0.07
-    TX            -1.0        0.37    0.40       -0.1    -3.1    4.65       0.03
-    ME-02          0.0        0.42    0.50        3.0     0.1    4.65       0.08
+                 lean       predictit  sim       polls    sim      HIQR        RCL
+    AK            -1.0        0.25    0.37      ----      -3.6    4.65       0.05
+    TX            -1.0        0.37    0.37        0.3 ?    -4.0    4.65       0.02
+    ME-02          0.0        0.42    0.49      ----      -0.7    4.65       0.06
 
 Four of these columns are just a recap of inputs from data.csv.
 The first numerical column is the L rating for
@@ -106,6 +106,12 @@ simulate this state's uncorrelated uncertainty (in addition to the nationwide,
 correlated uncertainty controlled by A). The width is described using half the
 inter-quartile range (HIQR), e.g., if the HIQR is 4%, then there's a 50% chance
 that the result will lie within the +-4% range.
+
+The real polling data are shown as the difference between the two polls (D-R).
+This may be followed by a ? or ! symbol. A ! means that even if every undecided
+voter were to go for the candidate who is currently losing, that candidate would
+still lose. A ? means that the current loser could win if they could just manage
+to get 2/3 of undecided votes to go for them.
 
 The RCL column gives the probability
 that the R candidate will win the election, conditioned on the hypothesis
