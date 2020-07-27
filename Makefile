@@ -4,7 +4,11 @@ default:
 	cat current_results.txt
 
 polls:
-	curl -o a.csv https://projects.fivethirtyeight.com/polls-page/president_polls.csv
-	mv a.csv president_polls.csv
 	./polls.py
+
+dl_polls:
+	curl -o temp.csv https://projects.fivethirtyeight.com/polls-page/president_polls.csv
+	mv temp.csv president_polls.csv
+	make polls
+
 

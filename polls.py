@@ -86,7 +86,10 @@ def main():
         details = ''
         for poll in by_state[state]: # dict with keys raw, date, pct
           age = (now-datetime.datetime.strptime(poll['date'], '%m/%d/%y')).days
-          pkey = poll['raw'][i_pollster]+","+poll['date']
+          #pkey = poll['raw'][i_pollster]+","+poll['date']
+          # ... done this way, we use multiple polls from the same pollster that are on different dates
+          pkey = poll['raw'][i_pollster]
+          # ... done this way, we use the first-listed poll by any pollster, which is the most recent; the input file is in reverse chronological order
           if pkey in pollsters:
             continue # only take the first poll by a given pollster on a given date
           pollsters.append(pkey)
