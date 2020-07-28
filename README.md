@@ -191,9 +191,10 @@ Used for two purposes: (1) used automatically to normalize the c parameter;
 
 The file polls.csv is constructed by first taking the csv file supplied by https://projects.fivethirtyeight.com/polls-page/president_polls.csv
 and then throwing away any polls unless they meet the following criteria:
-(1) the poll is not listed as a partisan poll; (2) the pollster has a grade of at least B- or B/C;
-and (3) the poll is less than 45 days old. Polls that satisfy these criteria are all weighted equally. 
-These criteria are designed to eliminate certain pollsters like Spry that fivethirtyeight's relatively permissive rules allow in.
+(1) the poll is not listed as a partisan poll; (2) the pollster has at least a certain grade;
+and (3) the poll is less than a certain number of days old.
+The cut-offs for rules 2 and 3 are set in the code at the top of polls.py. Polls that satisfy these criteria are all weighted equally. 
+Criterion 1 is designed to eliminate certain pollsters like Spry that fivethirtyeight's relatively permissive rules allow in.
 
 If a single pollster
 has more than one poll for a certain state, we take the one that is listed first in their csv file, which should be

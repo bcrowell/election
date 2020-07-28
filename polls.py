@@ -9,7 +9,7 @@ def minimum_grade():
   return grade_to_number("B/C") # minimum letter grade for pollsters
 
 def max_age():
-  return 45 # in days; don't take polls older than this
+  return 30 # in days; don't take polls older than this; making this short gives better data on undecideds
 
 def main():
   now = datetime.datetime.now()
