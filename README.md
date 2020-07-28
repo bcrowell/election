@@ -108,10 +108,12 @@ inter-quartile range (HIQR), e.g., if the HIQR is 4%, then there's a 50% chance
 that the result will lie within the +-4% range.
 
 The real polling data are shown as the difference between the two polls (D-R).
-This may be followed by a ? or ! symbol. A ! means that even if every undecided
-voter were to go for the candidate who is currently losing, that candidate would
-still lose. A ? means that the current loser could win if they could just manage
-to get 2/3 of undecided votes to go for them.
+This may be followed by a ? or ! symbol. A ! means that even if 9/10 of undecided
+voters were to go for the candidate who is currently losing, that candidate would
+still lose. A ? means that in order to win, the current loser would only need
+to get 6/10 of undecided votes to go for them. It was considered a big surprise in
+2016 when Trump won almost 6/10 of undecideds and also got about 1% of voters to
+defect from Clinton to him.
 
 The RCL column gives the probability
 that the R candidate will win the election, conditioned on the hypothesis
@@ -189,8 +191,8 @@ Used for two purposes: (1) used automatically to normalize the c parameter;
 
 The file polls.csv is constructed by first taking the csv file supplied by https://projects.fivethirtyeight.com/polls-page/president_polls.csv
 and then throwing away any polls unless they meet the following criteria:
-(1) the poll is not listed as a partisan poll; (2) the pollster has a grade of at least B (not B- or B/C);
-and (3) the poll is less than 60 days old. Polls that satisfy these criteria are all weighted equally. 
+(1) the poll is not listed as a partisan poll; (2) the pollster has a grade of at least B- or B/C;
+and (3) the poll is less than 45 days old. Polls that satisfy these criteria are all weighted equally. 
 These criteria are designed to eliminate certain pollsters like Spry that fivethirtyeight's relatively permissive rules allow in.
 
 If a single pollster

@@ -257,9 +257,9 @@ def uncertainty_symbol(pp,uu):
   y = (d-p)/2.0 # fraction R
   l = min(x,y) # lower share
   f = (0.5-l)/u # fraction of undecideds that the current loser would in order to win
-  if f>1:
-    return "!" # loser can't win even if all undecideds go to them
-  if f>0.66:
+  if f>0.9:
+    return "!" # current loser would need 9/10 of undecideds to go to them in order to win
+  if f>0.6:
     return " "
   return "?"
 

@@ -5,6 +5,12 @@
 
 import math,sys,csv,re,copy,datetime,statistics
 
+def minimum_grade():
+  return grade_to_number("B/C") # minimum letter grade for pollsters
+
+def max_age():
+  return 45 # in days; don't take polls older than this
+
 def main():
   now = datetime.datetime.now()
   infile = 'president_polls.csv'
@@ -34,7 +40,7 @@ def main():
         continue
       if re.search(r"\w",partisan): # this is blank for polls from the primaries
         continue
-      if (not re.search(r"[AB]",grade)) or re.search(r"(C|B\-)",grade): # reject b/c, b-, or anything that doesn't have a or b in it
+      if grade_to_number(grade)<minimum_grade():
         continue
       if not (answer.lower() in candidates):
         continue
@@ -95,7 +101,7 @@ def main():
           if pkey in pollsters:
             continue # only take the first poll by a given pollster on a given date
           pollsters.append(pkey)
-          if age<60:
+          if age<max_age():
             details = details + f"    {poll['date']} {poll['pct']} undecided={poll['undecided']} {poll['raw'][i_pollster]}\n"
             results.append(poll['pct'])
             results_undecided.append(poll['undecided'])
@@ -117,6 +123,16 @@ def unpack_row(row,col_map,keys):
 
 def cols():
   return ["state","fte_grade","office_type","end_date","partisan","answer","pct","pollster"]
+
+def grade_to_number(grade):
+  # convert letter grade to a number, higher being better
+  pats = ["A+","A","A-","B+","B","B-","A/B","C+","C","C-","B/C","D+","D","D-","C/D","D/F","F"]
+  # grades like B/C are given to pollsters with not much of a track record, the ones shown with dotted circles, so put them low down
+  n = len(pats)
+  for i in range(n):
+    if grade.lower()==pats[i].lower():
+      return n-i
+  raise Exception(f"unrecognized grade {grade}")
 
 def state_to_abbrev(name):
   # https://gist.github.com/rogerallen/1583593 , public domain
