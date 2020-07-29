@@ -40,13 +40,16 @@ How the model works
 Each state has a "lean" value L, based on the consensus of several experts (Cook, insideelections, and Sabato). L=0 means
 a toss-up, L>0 is favorable to the democrats. For example, a state that leans slightly to the democrats would
 have L=+1, while a reasonably safe republican state like Montana is -2. These values are multiplied by a factor
-that is automatically calculated so that for swing states, the standard deviation of the L values is the same
-as the standard deviation of the polling results. For example, in July of 2020, this scaling factor comes out
+that is automatically calculated so that for swing states, their spread is the same as 
+the spread in the polling results. For example, in July of 2020, this scaling factor, c, comes out
 to be 3.0, meaning that if a state has L=+1, the democratic candidate is expected to win by 3 points.
 These could also have just been taken directly from polling, but I decided to put more emphasis on
 experts' opinions. In July 2020, these expert opinions seem to predict that a lot of states will behave
 more according to their partisan voting index than indicated by current polls, i.e.,they are expecting
 a regression toward historical behavior between now and the election.
+
+The results of the simulation are sensitive to c, and the value of c is in turn sensitive to the exact
+criteria used for calculating it. These criteria are set in the function calibrate_lean_to_percent().
 
 The election is run n times in a Monte Carlo simulation, with some randomness thrown in on top of each state's
 expected margin. This randomness accounts for

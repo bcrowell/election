@@ -90,7 +90,7 @@ def main():
 
   d_prob = d_wins/n_trials
   output(pars,
-         {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table,'aa':aa},
+         {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table,'aa':aa,'c':c},
          {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,'undecided':undecided,
             'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind,'vote_avg':vote_avg,
             'electoral_college_histogram':electoral_college_histogram}
@@ -107,12 +107,12 @@ def write_electoral_college_histogram(filename,electoral_college_histogram,n_tri
 
 def output(pars,results,sd):
   (a,k,s,dist,n_trials,joint,swing) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['n_trials'],pars['joint'],pars['swing'])
-  (d_prob,prob,rcl,joint_table,aa) = (results['d_prob'],results['prob'],results['rcl'],results['joint_table'],results['aa'])
+  (d_prob,prob,rcl,joint_table,aa,c) = (results['d_prob'],results['prob'],results['rcl'],results['joint_table'],results['aa'],results['c'])
   (electoral_votes,lean,predictit_prob,poll,undecided,safe_d,safe_r,tot,states,ind,vote_avg) = (
             sd['electoral_votes'],sd['lean'],sd['predictit_prob'],sd['poll'],sd['undecided'],
             sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'],sd['ind'],sd['vote_avg'])
 
-  print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist)
+  print("A=",f1(a),", k=",f1(k),", s=",f1(s),", dist=",dist,", c=",f1(c))
   if dist=='cauchy':
     print("Note: Since dist is Cauchy, which has fat tails, probabilities for safe states are less extreme. This is intentional.")
   if swing==1:
@@ -180,15 +180,18 @@ def calibrate_lean_to_percent(poll,lean):
   swing_poll_list = []
   swing_lean_list = []
   for state in poll:
-    if abs(lean[state])<4 and state in poll and not (poll[state] is None):
-      # Don't count states with huge lean values, not real swing states, because those values aren't carefully calibrated.
+    if abs(lean[state])<=2 and state in poll and not (poll[state] is None) and abs(poll[state]<6.0):
+      # Don't count states with huge lean values L. These aren't real swing states, and those values aren't carefully calibrated and aren't
+      # relevant to the outcome of the election. Exclude states with extreme polling, because they can influence c too much.
+      # E.g., at the end of July 2020, PA was Biden+12 in high-quality polls (which may have been outliers), but experts were
+      # giving PA a relatively small L.
       swing_poll_list.append(poll[state])
       swing_lean_list.append(lean[state])
-  poll_sd = statistics.stdev(swing_poll_list)
-  lean_sd = statistics.stdev(swing_lean_list)
+  poll_spread = spread(swing_poll_list)
+  lean_spread = spread(swing_lean_list)
 
   # calibration of "lean" data to give % units
-  c = poll_sd/lean_sd
+  c = poll_spread/lean_spread
   return c
 
 def state_data(filename,polls_file):
@@ -434,5 +437,19 @@ def parameter_types():
 
 def set_is_empty(s):
   return s == set()
+
+def spread(l):
+  # used in calculating the calibration coefficient c
+  # Empirically, it doesn't matter much whether we use std dev or mean abs dev. Probably this is because we
+  # truncate the tails of the list anyway before we calculate the spread, so extreme values can't influence the std dev much.
+  #return statistics.stdev(l)
+  return mean_abs_dev(l)
+
+def mean_abs_dev(l):
+  avg = statistics.mean(l)
+  sum = 0
+  for x in l:
+    sum += abs(x-avg)
+  return sum/len(l)
 
 main()
