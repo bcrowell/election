@@ -113,7 +113,11 @@ voters were to go for the candidate who is currently losing, that candidate woul
 still lose. A ? means that in order to win, the current loser would only need
 to get 6/10 of undecided votes to go for them. It was considered a big surprise in
 2016 when Trump won almost 6/10 of undecideds and also got about 1% of voters to
-defect from Clinton to him.
+defect from Clinton to him. In these calculations, "undecided" is taken to be anyone
+who the pollster didn't count for one candidate or the other, although in reality this
+also includes people who said they wouldn't vote or would vote for someone else.
+People who say they actually are undecided may be counter in the totals if pollsters
+follow up be asking them which way they lean, and they don't "refuse to lean."
 
 The RCL column gives the probability
 that the R candidate will win the election, conditioned on the hypothesis
@@ -138,7 +142,7 @@ To see a table of joint probabilities for two states, do something like
 `election.py joint=pa,wi`. To use the national result in place of one of
 the states, do, e.g., `election.py joint=pa,nat`.
 
-Data file and sources of data
+Data files and sources of data
 =============================
 
 Per-state data are in the files data.csv and polls.csv. States that don't appear in data.csv are

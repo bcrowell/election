@@ -82,8 +82,6 @@ def main():
         if not (state in by_state):
           by_state[state] = []
         by_state[state].append({'raw':d1,'date':date,'pct':pct,'undecided':undecided})
-      else:
-        print(d1)
     states = list(by_state.keys())
     states.sort()
     with open(outfile,'w') as f:

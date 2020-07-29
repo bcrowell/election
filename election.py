@@ -327,7 +327,7 @@ def die(message):
 
 def f1(x):
   if x is None:
-    return "----"
+    return "  ---"
   else:
     return ("%5.1f") % x
 
