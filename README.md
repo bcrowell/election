@@ -41,9 +41,11 @@ Each state has a "lean" value L, based on the consensus of several experts (Cook
 a toss-up, L>0 is favorable to the democrats. For example, a state that leans slightly to the democrats would
 have L=+1, while a reasonably safe republican state like Montana is -2. These values are multiplied by a factor
 that is automatically calculated so that for swing states, their spread is the same as 
-the spread in the polling results. For example, in July of 2020, this scaling factor, c, comes out
+the spread in the polling results. The result is taken as the expected value of the vote difference.
+For example, in July of 2020, this scaling factor, c, comes out
 to be 3.0, meaning that if a state has L=+1, the democratic candidate is expected to win by 3 points.
-These could also have just been taken directly from polling, but I decided to put more emphasis on
+
+These expected values could instead have been taken directly from polling, but I decided to put more emphasis on
 experts' opinions. In July 2020, these expert opinions seem to predict that a lot of states will behave
 more according to their partisan voting index than indicated by current polls, i.e.,they are expecting
 a regression toward historical behavior between now and the election.

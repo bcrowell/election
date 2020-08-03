@@ -6,10 +6,14 @@
 import math,sys,csv,re,copy,datetime,statistics
 
 def minimum_grade():
-  return grade_to_number("B") # minimum letter grade for pollsters
+  return grade_to_number("B/C") # minimum letter grade for pollsters
 
 def max_age():
-  return 30 # in days; don't take polls older than this; making this short gives better data on undecideds
+  return 60 # in days; don't take polls older than this; this is much longer than half_life, so normally has little effect, but it
+            # keeps us from getting the impression that we really have polling data when actually there's no fresh data for a neglected state
+
+def half_life():
+  return 20 # in days, for weighted averaging of polls; making this short gives better data on undecideds
 
 def main():
   now = datetime.datetime.now()
@@ -87,7 +91,6 @@ def main():
     with open(outfile,'w') as f:
       for state in states:
         results = []
-        results_undecided = []
         pollsters = [] # only take the first poll by a given pollster on a given date
         details = ''
         for poll in by_state[state]: # dict with keys raw, date, pct
@@ -101,12 +104,20 @@ def main():
           pollsters.append(pkey)
           if age<max_age():
             details = details + f"    {poll['date']} {poll['pct']} undecided={poll['undecided']} {poll['raw'][i_pollster]}\n"
-            results.append(poll['pct'])
-            results_undecided.append(poll['undecided'])
+            weight = 2.0**(-age/half_life())
+            results.append([poll['pct'],poll['undecided'],weight])
         if len(results)==0:
           continue
-        avg = statistics.mean(results)
-        und = statistics.mean(results_undecided)
+        sum_poll = 0.0
+        sum_undecided = 0.0
+        sum_weight = 0.0
+        for r in results:
+          p,u,w = r
+          sum_poll += p*w
+          sum_undecided += u*w
+          sum_weight += w
+        avg = sum_poll/sum_weight
+        und = sum_undecided/sum_weight
         print("state=",state,", avg=",f1(avg),", undecided=",f1(und))
         print(details)
         f.write(f'{state.lower()},{f1(avg)},{f1(und)}\n')
