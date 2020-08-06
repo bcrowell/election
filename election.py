@@ -1,6 +1,6 @@
 #!/bin/python3
 
-import math,random,statistics,sys,csv,re
+import math,random,statistics,sys,csv,re,copy
 
 def parameters(filename):
   '''
@@ -225,9 +225,10 @@ def state_data(filename,polls_file):
         poll[state] = float(row[1])
         undecided[state] = float(row[2])
 
-  # list of states, sorted in order by probability on predictit
+  # list of states, sorted in order by lean, and secondarily by polls, probability on predictit
   states = list(electoral_votes.keys())
-  states.sort(key=lambda s:predictit_prob[s])
+  states.sort(key=lambda s:lean[s]) # rough initial sort
+  states = bubble_sort(states,lean,poll,predictit_prob) # refine the sort; can't do this using python's sort
 
   # Safe states are those that don't occur in the data file.
   safe_d =  68 # includes 3 electoral votes from maine, but not ME-02
@@ -247,6 +248,46 @@ def state_data(filename,polls_file):
 # it's capped by statute at this value: https://en.wikipedia.org/wiki/United_States_congressional_apportionment
 def electoral_college_size():
   return 538
+
+def sort_order(lean,poll,predictit_prob):
+  if poll is None:
+    p = 0.0
+  else:
+    p = poll
+  return (lean,p,predictit_prob)  
+
+def bubble_sort(orig,lean,polls,prob):
+  """
+  For efficiency, we do this after an initial, more efficient sort using python's sort function. The problem
+  with python's sort is that it doesn't allow special-casing when we lack data for a certain field.
+  """
+  states = copy.deepcopy(orig)
+  while True:
+    n_swaps = 0
+    for i in range(len(states)-1):
+      s1 = states[i]
+      s2 = states[i+1]
+      if cmp((lean[s1],polls[s1],prob[s1]),(lean[s2],polls[s2],prob[s2]))<0:
+        n_swaps += 1
+        temp = s1
+        states[i] = s2
+        states[i+1] = temp
+    if n_swaps==0:
+      break
+  return states
+
+def cmp(p1,p2):
+  """
+  Defines sort order. p1 and p2 are each 3-tuples of (lean,poll,probability).
+  The poll data may be None, which is why we have to go to all this trouble.
+  """
+  l1,po1,pr1 = p1
+  l2,po2,pr2 = p2
+  if l1!=l2:
+    return l2-l1
+  if not ((po1 is None) or (po2 is None)):
+    return po2-po1
+  return pr2-pr1
 
 def uncertainty_symbol(pp,uu):
   # pp = difference in polls
