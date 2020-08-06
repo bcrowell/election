@@ -121,7 +121,7 @@ to get 6/10 of undecided votes to go for them. It was considered a big surprise 
 defect from Clinton to him. In these calculations, "undecided" is taken to be anyone
 who the pollster didn't count for one candidate or the other, although in reality this
 also includes people who said they wouldn't vote or would vote for someone else.
-People who say they actually are undecided may be counter in the totals if pollsters
+People who say they actually are undecided may be counted in the totals if pollsters
 follow up be asking them which way they lean, and they don't "refuse to lean."
 
 The RCL column gives the probability
@@ -129,7 +129,8 @@ that the R candidate will win the election, conditioned on the hypothesis
 that he loses this state.
 
 A histogram of probabilities of various electoral college results is printed
-to the file histogram.txt.
+to the file histogram.txt. A histogram of probabilities for tipping points is
+stored in tipping.txt.
 
 Running the program
 ===================
