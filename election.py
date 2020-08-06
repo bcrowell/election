@@ -61,11 +61,15 @@ def main():
     vote_avg[state] = 0
   joint_table = [[0,0],[0,0]]
   electoral_college_histogram = [0] * n_predictit_bins()
+  tipping_histogram = {}
+  for state in electoral_votes:
+    tipping_histogram[state] = 0
   for i in range(n_trials):
     t = do_one_trial({'safe_d':safe_d,'safe_r':safe_r,'aa':aa,'k':k,'s':s,'dist':dist,'tot':tot,'c':c,
                  'ind':ind,'electoral_votes':electoral_votes,'lean':lean,'tie':tie})
     d_wins += t['d_win']
     electoral_college_histogram[t['bin']] += 1
+    tipping_histogram[t['tipping']] += 1
     for state in states:
       state_d_wins[state] += t['state_d_win'][state]
       if t['state_d_win'][state]==1 and t['d_win']==0:
@@ -93,10 +97,17 @@ def main():
          {'d_prob':d_prob,'prob':prob,'rcl':rcl,'joint_table':joint_table,'aa':aa,'c':c},
          {'electoral_votes':electoral_votes,'lean':lean,'predictit_prob':predictit_prob,'poll':poll,'undecided':undecided,
             'safe_d':safe_d,'safe_r':safe_r,'tot':tot,'states':states,'ind':ind,'vote_avg':vote_avg,
-            'electoral_college_histogram':electoral_college_histogram}
+            'electoral_college_histogram':electoral_college_histogram,'tipping_histogram':tipping_histogram}
         )
   write_electoral_college_histogram('histogram.txt',electoral_college_histogram,n_trials)
+  write_tipping_histogram('tipping.txt',tipping_histogram,n_trials,states)
 
+
+def write_tipping_histogram(filename,histogram,n_trials,states):
+  with open(filename,'w') as f:
+    print("probabilities of tipping points:",file=f)
+    for state in states:
+      print(f"  {state}  {f3(histogram[state]/n_trials)}",file=f)
 
 def write_electoral_college_histogram(filename,electoral_college_histogram,n_trials):
   with open(filename,'w') as f:
@@ -166,12 +177,12 @@ def do_one_trial(dat):
       t['state_d_win'][state] = 0
   tie = (d*2==tot)
   if d>tot*0.5 or (tie and dat['tie']==1):
-    # fixme: handle the case of a tie in the electoral college
     t['d_win'] = 1
   else:
     t['d_win'] = 0
   t['vote'] = x
   t['bin'] = vote_margin_to_predictit_bin(2*d-electoral_college_size())[0]
+  t['tipping'] = tipping_point(safe_d,safe_r,x,electoral_votes,dat['tie'],t['d_win'],2) # 2 means use predictit's definition
   return t
 
 def calibrate_lean_to_percent(poll,lean):
@@ -307,6 +318,36 @@ def uncertainty_symbol(pp,uu):
     return " "
   return "?"
 
+def tipping_point(safe_d,safe_r,margins,electoral_votes,tie,d_win,tip_definition):
+  """
+  tie = 0 if R's win on a tie, 1 if D's do
+  d_win=0 if R won, 1 if D won
+  tip_definition=1 means what really happens based on tie, 2 means predictit's definition
+  """
+  if d_win:
+    sgn = -1
+    winning_votes = safe_d
+  else:
+    sgn = 1
+    winning_votes = safe_r
+  states = list(margins.keys())
+  states.sort(key=lambda state:sgn*margins[state]) # for D win, this starts from the safest blue states, like california
+  if tip_definition==1:
+    if (tie==0 and d_win==0) or (tie==1 and d_win==1):
+      # Winner would win with a tie
+      needed = electoral_college_size()/2
+    else:
+      needed = int(electoral_college_size()/2+1)
+  else:
+    needed = int(electoral_college_size()/2+1)
+  for state in states:
+    before = winning_votes
+    after = before+electoral_votes[state]
+    if before<needed and after>=needed:
+      return state
+    winning_votes += electoral_votes[state]
+  raise Exception("tipping point not found")
+
 def correlation_to_weight(rho):
   return math.sqrt(rho**-0.5-1)
 
@@ -380,6 +421,12 @@ def f2(x):
     return "-----"
   else:
     return ("%5.2f") % x
+
+def f3(x):
+  if x is None:
+    return "-----"
+  else:
+    return ("%6.3f") % x
 
 def predictit_bins():
   return [0, 10, 30, 60, 100, 150, 210, 280] # special casing for 0
