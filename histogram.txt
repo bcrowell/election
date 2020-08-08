@@ -11,7 +11,7 @@ probabilities of electoral college margins:
    10 to 29 ,   0.03
    30 to 59 ,   0.05
    60 to 99 ,   0.08
-   100 to 149 ,   0.12
+   100 to 149 ,   0.13
    150 to 209 ,   0.14
-   210 to 279 ,   0.17
-   280 to 538 ,   0.17
+   210 to 279 ,   0.16
+   280 to 538 ,   0.18
