@@ -47,8 +47,9 @@ to be 3.0, meaning that if a state has L=+1, the democratic candidate is expecte
 
 These expected values could instead have been taken directly from polling, but I decided to put more emphasis on
 experts' opinions. In July 2020, these expert opinions seem to predict that a lot of states will behave
-more according to their partisan voting index than indicated by current polls, i.e.,they are expecting
-a regression toward historical behavior between now and the election.
+more according to their partisan voting index than indicated by current polls, i.e., they are expecting
+a regression toward historical behavior between now and the election. The simulation undoes this by
+adding a constant onto all the L values in order to reproduce the mean of swing-state polls.
 
 The results of the simulation are sensitive to c, and the value of c is in turn sensitive to the exact
 criteria used for calculating it. These criteria are set in the function calibrate_lean_to_percent().

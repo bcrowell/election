@@ -39,7 +39,8 @@ def main():
             sd['safe_d'],sd['safe_r'],sd['tot'],sd['states'])
 
   n = len(electoral_votes) # number of swing states
-  c = calibrate_lean_to_percent(poll,lean)
+  c,auto_k = calibrate_lean_to_percent(poll,lean)
+  k = k+auto_k
   aa = math.sqrt(math.pi/2.0)*a # Convert mean absolute value to std dev, assuming normal, even if normal isn't what we're actually using.
                                 # See notes on how choice of distribution function affects A.
 
@@ -203,7 +204,9 @@ def calibrate_lean_to_percent(poll,lean):
 
   # calibration of "lean" data to give % units
   c = poll_spread/lean_spread
-  return c
+  k = statistics.mean(swing_poll_list)/c-statistics.mean(swing_lean_list)
+
+  return (c,k)
 
 def state_data(filename,polls_file):
   electoral_votes = {}
