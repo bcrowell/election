@@ -267,7 +267,7 @@ this has the effect of making the per-state probabilities agree worse with predi
 For k, setting it to more than ~1 unit means disagreeing significantly with experts, who in July 2020 seem to be expecting reversion
 to the mean of states' past behavior.
 
-The rho values I'm using are correlations of state A with state B. I want mine to be state with national, but that should be about the same.
+The rho values I'm using are correlations of state 1 with state 2. I want mine to be state with national, but that should be about the same.
 However, if I just take the per-state variation to be what would mathematically reproduce these rho values, then
 the per-state variation only turns out to contribute about half the variance. This is too small, since state polling
 generally has about twice the error of national polling, and therefore we want per-state variation to be about twice
@@ -292,7 +292,7 @@ delegation deadlocks, it sits out that round of voting.
 How per-state variability is set
 ================================
 The parameters B_i are cooked up based on 
-[some data I found](https://projects.economist.com/us-2020-forecast/president/how-this-works)
+[some estimates I found](https://projects.economist.com/us-2020-forecast/president/how-this-works)
 about correlations between vote totals in various swing states. Basically most of the swing states are
 in the north, and are more highly correlated, but NV and FL have a lower correlation.
 Therefore those two states are special-cased.
