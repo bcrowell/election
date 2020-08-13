@@ -32,9 +32,8 @@ def parameters(filename):
 def main():
 
   pars = parameters('defaults.txt')
-  (k,s,dist,rho,n_trials,joint,tie) = (pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'],pars['tie'])
+  (a,k,s,dist,rho,n_trials,joint,tie) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'],pars['tie'])
   (rho1,rho2,rho3) = rho
-  a = 6.0
 
   sd = state_data('data.csv','polls.csv')
   (electoral_votes,lean,predictit_prob,poll,undecided,safe_d,safe_r,tot,states) = (
