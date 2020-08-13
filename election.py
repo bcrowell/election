@@ -1,6 +1,6 @@
 #!/bin/python3
 
-import math,random,statistics,sys,csv,re,copy
+import math,random,statistics,sys,csv,re,copy,datetime
 
 def parameters(filename):
   '''
@@ -11,7 +11,7 @@ def parameters(filename):
 
   pars = get_defaults_from_file(filename)
 
-  missing = set(pars.keys())-set(parameter_names())
+  missing = set(pars.keys())-set(parameter_names())-set(['a'])
   if not set_is_empty(missing):
     die("missing parameters: "+repr(missing))
 
@@ -23,6 +23,8 @@ def parameters(filename):
   pars['rho'] = (rho1,rho2,rho3)
   pars['joint'] = ('','')
 
+  pars['a'] = guess_national_variability()
+
   pars = get_command_line_pars(pars) # override defaults
 
   return pars
@@ -30,8 +32,9 @@ def parameters(filename):
 def main():
 
   pars = parameters('defaults.txt')
-  (a,k,s,dist,rho,n_trials,joint,tie) = (pars['a'],pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'],pars['tie'])
+  (k,s,dist,rho,n_trials,joint,tie) = (pars['k'],pars['s'],pars['dist'],pars['rho'],pars['n_trials'],pars['joint'],pars['tie'])
   (rho1,rho2,rho3) = rho
+  a = 6.0
 
   sd = state_data('data.csv','polls.csv')
   (electoral_votes,lean,predictit_prob,poll,undecided,safe_d,safe_r,tot,states) = (
@@ -185,6 +188,21 @@ def do_one_trial(dat):
   t['bin'] = vote_margin_to_predictit_bin(2*d-electoral_college_size())[0]
   t['tipping'] = tipping_point(safe_d,safe_r,x,electoral_votes,dat['tie'],t['d_win'],2) # 2 means use predictit's definition
   return t
+
+def guess_national_variability():
+  now = datetime.datetime.now()
+  t = abs((now-datetime.datetime.strptime("11/3/20", '%m/%d/%y')).days) # days until the election
+  # See README file for estimate that A=7 in mid-july (111 days), 2.5 (election day). 
+  if t>30:
+    t=t-30
+  # Since most voters will be voting by mail in 2020, shorten this timeline by 30 days.
+  max_a = 7
+  min_a = 2.5
+  if t>111:
+    return max_a
+  if t<=0:
+    return min_a
+  return min_a+(t-30)*(max_a-min_a)/(80-30)
 
 def calibrate_lean_to_percent(poll,lean):
   # Calculate a measure of the spread in the lean[] values and the poll[] values, to allow the normalization parameter

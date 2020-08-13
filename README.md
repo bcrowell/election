@@ -256,6 +256,9 @@ https://www.thecrosstab.com/2017/01/03/history-polling-error-us-uk/
 https://politics.stackexchange.com/questions/54680/historical-data-on-how-the-reliability-of-polling-data-depends-on-time-remaining
 
 So reasonable estimates for A, which measures national vote uncertainty, are: July 7%, November 2.5%.
+The code therefore defaults to setting the value of A based on linear interpolation based on these values.
+For 2020, due to the covid epidemic, most people will be voting by mail, and therefore the time remaining
+until the election is reduced by 30 days for the purposes of this estimation.
 
 All of the above assumes a normal distribution, but I doubt that real political fluctuations have tails as skinny as
 those of a normal distribution. Epidemics and volcanoes happen, etc. I currently have dist=cauchy rather than normal.
