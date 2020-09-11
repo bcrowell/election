@@ -1,4 +1,4 @@
-k=0.0
+k=-2
 s=2.0
 dist=cauchy
 n_trials=10000

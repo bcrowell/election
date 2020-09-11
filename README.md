@@ -225,7 +225,7 @@ The main parameters that it makes sense to fiddle with are A, k, s, and dist.
 
 A = mean absolute error of popular-vote shift between now and election day, in percentage points
 
-k = offset to lean[] values; setting this to a positive value favors D candidate, means I don't believe experts who are saying the 2020 election is close
+k = offset to lean[] values; I currently have this set to -2 by default as an estimate of the net votes lost to Biden in 2020 due to rejected mail-in ballots
 
 s = a fudge factor for variability of state votes, see below
 
