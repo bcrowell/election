@@ -42,7 +42,9 @@ def main():
 
   n = len(electoral_votes) # number of swing states
   c,auto_k = calibrate_lean_to_percent(poll,lean)
-  k = k+auto_k
+  #k = k+auto_k
+  # ... if this is uncommented, then we distrust the experts and adjust k; did this in late summer 2020 because experts' ratings were
+  #     getting extremely stale
   aa = math.sqrt(math.pi/2.0)*a # Convert mean absolute value to std dev, assuming normal, even if normal isn't what we're actually using.
                                 # See notes on how choice of distribution function affects A.
 
