@@ -203,7 +203,7 @@ def guess_national_variability():
     return max_a
   if t<=0:
     return min_a
-  return min_a+(t-30)*(max_a-min_a)/(80-30)
+  return min_a+t*(max_a-min_a)/(80-30)
 
 def calibrate_lean_to_percent(poll,lean):
   # Calculate a measure of the spread in the lean[] values and the poll[] values, to allow the normalization parameter
