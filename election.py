@@ -194,8 +194,9 @@ def guess_national_variability():
   now = datetime.datetime.now()
   t = abs((now-datetime.datetime.strptime("11/3/20", '%m/%d/%y')).days) # days until the election
   # See README file for estimate that A=7 in mid-july (111 days), 2.5 (election day). 
-  if t>30:
-    t=t-30
+  t=t-30
+  if t<0:
+    t = 0
   # Since most voters will be voting by mail in 2020, shorten this timeline by 30 days.
   max_a = 7
   min_a = 2.5
