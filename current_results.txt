@@ -1,20 +1,20 @@
-A=   2.5 , k=   0.0 , s=   2.0 , dist= cauchy , c=   3.8
+A=   3.4 , k=   0.0 , s=   2.0 , dist= cauchy , c=   3.8
 Note: Since dist is Cauchy, which has fat tails, probabilities for safe states are less extreme. This is intentional.
 Because swing=1, some states are omitted from the listing.
-Half inter-quartile range (HIQR) of nationally correlated fluctuations =   2.11  %
-prob of D win= 0.8115
+Half inter-quartile range (HIQR) of nationally correlated fluctuations =   2.87  %
+prob of D win= 0.7687
              lean       predictit  sim       polls    sim      HIQR        RCL
-AK            -2.0        0.25    0.14        ---      -7.3    1.66       0.04
-TX            -1.0        0.37    0.25       -2.8      -3.8    1.66       0.01
-ME-02          0.0        0.42    0.50        ---      -0.1    1.66       0.03
-GA             0.0        0.46    0.50        0.1 ?    -0.1    1.66       0.02
-OH             0.0        0.45    0.50        0.3 ?    -0.2    1.66       0.02
-IA             0.0        0.43    0.50        1.2 ?    -0.2    1.66       0.03
-NC             0.0        0.57    0.51        1.5      -0.2    1.66       0.02
-FL             0.0        0.56    0.50        3.1       0.0    2.72       0.03
-AZ             1.0        0.64    0.75        3.0       3.2    1.66       0.05
-WI             1.0        0.68    0.75        6.1 !     3.4    1.66       0.06
-PA             1.0        0.69    0.75        6.7 !     3.6    1.66       0.05
-NE-02          1.0        0.74    0.75        ---       3.4    1.66       0.06
-MI             1.0        0.75    0.75        7.8 !     3.6    1.66       0.05
-NH             2.0        0.77    0.85        8.8 !     7.1    1.66       0.11
+AK            -2.0        0.25    0.19        ---      -6.8    2.26       0.05
+TX            -1.0        0.37    0.31       -2.8      -3.4    2.26       0.02
+ME-02          0.0        0.42    0.51        ---       0.1    2.26       0.06
+GA             0.0        0.46    0.51        0.1 ?     0.0    2.26       0.04
+OH             0.0        0.45    0.50        0.3 ?    -0.1    2.26       0.04
+IA             0.0        0.43    0.51        1.2 ?     0.2    2.26       0.05
+NC             0.0        0.57    0.50        1.5      -0.0    2.26       0.04
+FL             0.0        0.56    0.51        3.1       0.1    3.69       0.04
+AZ             1.0        0.64    0.70        3.0       3.5    2.26       0.07
+WI             1.0        0.68    0.70        6.1 !     3.5    2.26       0.07
+PA             1.0        0.69    0.70        6.7 !     3.5    2.26       0.07
+NE-02          1.0        0.74    0.70        ---       3.3    2.26       0.08
+MI             1.0        0.75    0.70        7.8 !     3.7    2.26       0.06
+NH             2.0        0.77    0.81        8.8 !     7.2    2.26       0.13

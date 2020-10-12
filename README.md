@@ -79,6 +79,7 @@ you can select the normal curve instead. The units
 of the A and B_i variables should basically be interpreted as mean
 absolute errors, but for those who care about mathematical details,
 see the section below titled "Details about the bell curves."
+Nate Silver's model use Student's t distribution for this purpose.
 
 Not all states are included in the simulation. Small states that are solid red or blue are
 simply counted as safe electoral votes. This is mainly because there is
@@ -256,8 +257,6 @@ https://politics.stackexchange.com/questions/54680/historical-data-on-how-the-re
 
 So reasonable estimates for A, which measures national vote uncertainty, are: July 7%, November 2.5%.
 The code therefore defaults to setting the value of A based on linear interpolation based on these values.
-For 2020, due to the covid epidemic, most people will be voting by mail, and therefore the time remaining
-until the election is reduced by 30 days for the purposes of this estimation.
 
 All of the above assumes a normal distribution, but I doubt that real political fluctuations have tails as skinny as
 those of a normal distribution. Epidemics and volcanoes happen, etc. I currently have dist=cauchy rather than normal.
